@@ -152,8 +152,20 @@ class UserResource(ModelResource):
     filtering = {
       'first_name': ALL_WITH_RELATIONS,
       'last_name': ALL_WITH_RELATIONS,
+      'username': ALL_WITH_RELATIONS,
       'permissions': ALL_WITH_RELATIONS
     }
+
+  def hydrate_permissions(self, bundle):
+    perms = []
+    for perm in bundle.data['permissions']:
+      if isinstance(perm, basestring):
+        app, codename = perm.split('.')
+        perms.append(Permission.objects.get(content_type__app_label=app, codename=codename))
+      else:
+        perms.append(perm)
+    bundle.data['permissions'] = perms
+    return bundle
 
 class MembershipPeriodResource(ModelResource):
   rank = fields.ToOneField(RankResource, 'rank', full=True)
