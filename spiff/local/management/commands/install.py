@@ -3,6 +3,7 @@ from django.core import management
 from django.utils.six.moves import input
 from colorama import Fore, Back, Style, init
 from django.contrib.sites.models import Site
+from django.contrib.auth.models import User
 from django.db import transaction
 import getpass
 
@@ -70,10 +71,12 @@ class Command(BaseCommand):
     confirm = input("Does all of this look okay to you? [Y/n] ")
     if confirm.lower() == "y" or confirm == "":
       print Fore.GREEN+"Installing to database..."+Fore.RESET
+      management.call_command('syncdb', interactive=False)
+      management.call_command('migrate', interactive=False)
       with transaction.atomic():
         site.save()
-        User.objects.create_superuser({'username': username, 'password': password, 'email': email})
-      print Style.YELLOW+Style.BRIGHT+"EXCELLENT!"+Style.NORMAL+Fore.RESET
+        User.objects.create_superuser(username=username, password=password, email=email)
+      print Fore.YELLOW+Style.BRIGHT+"EXCELLENT!"+Style.NORMAL+Fore.RESET
       print Style.BRIGHT+"Your installation of Spiff is complete. Stay excellent, fellow hacker."+Style.NORMAL
     else:
       print Fore.RED+"Configuration abandoned."+Fore.RESET
