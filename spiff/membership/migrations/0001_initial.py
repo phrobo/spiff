@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import datetime
+from south.utils import datetime_utils as datetime
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
@@ -8,153 +8,254 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
+        # Adding model 'UserResetToken'
+        db.create_table(u'membership_userresettoken', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('user', self.gf('django.db.models.fields.related.ForeignKey')(related_name='resetTokens', to=orm['auth.User'])),
+            ('token', self.gf('django.db.models.fields.CharField')(max_length=10)),
+            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
+        ))
+        db.send_create_signal(u'membership', ['UserResetToken'])
+
         # Adding model 'Member'
-        db.create_table('membership_member', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+        db.create_table(u'membership_member', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('tagline', self.gf('django.db.models.fields.CharField')(max_length=255)),
-            ('profession', self.gf('django.db.models.fields.CharField')(max_length=255)),
-            ('user', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['auth.User'], unique=True)),
+            ('user', self.gf('django.db.models.fields.related.OneToOneField')(related_name='member', unique=True, to=orm['auth.User'])),
             ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('lastSeen', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('birthday', self.gf('django.db.models.fields.DateField')(null=True, blank=True)),
+            ('stripeID', self.gf('django.db.models.fields.TextField')()),
+            ('hidden', self.gf('django.db.models.fields.BooleanField')(default=False)),
         ))
-        db.send_create_signal('membership', ['Member'])
-
-        # Adding model 'DuePayment'
-        db.create_table('membership_duepayment', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('member', self.gf('django.db.models.fields.related.ForeignKey')(related_name='payments', to=orm['membership.Member'])),
-            ('value', self.gf('django.db.models.fields.FloatField')()),
-            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('rank', self.gf('django.db.models.fields.related.ForeignKey')(related_name='payments', to=orm['membership.Rank'])),
-        ))
-        db.send_create_signal('membership', ['DuePayment'])
+        db.send_create_signal(u'membership', ['Member'])
 
         # Adding model 'Rank'
-        db.create_table('membership_rank', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+        db.create_table(u'membership_rank', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('description', self.gf('django.db.models.fields.TextField')(blank=True)),
             ('monthlyDues', self.gf('django.db.models.fields.FloatField')(default=0)),
             ('group', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['auth.Group'], unique=True)),
+            ('isActiveMembership', self.gf('django.db.models.fields.BooleanField')(default=False)),
+            ('isKeyholder', self.gf('django.db.models.fields.BooleanField')(default=False)),
         ))
-        db.send_create_signal('membership', ['Rank'])
+        db.send_create_signal(u'membership', ['Rank'])
 
         # Adding model 'Field'
-        db.create_table('membership_field', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+        db.create_table(u'membership_field', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('name', self.gf('django.db.models.fields.CharField')(max_length=100)),
             ('description', self.gf('django.db.models.fields.TextField')(blank=True)),
-            ('multiple', self.gf('django.db.models.fields.BooleanField')(default=False)),
             ('required', self.gf('django.db.models.fields.BooleanField')(default=False)),
             ('public', self.gf('django.db.models.fields.BooleanField')(default=False)),
+            ('protected', self.gf('django.db.models.fields.BooleanField')(default=False)),
         ))
-        db.send_create_signal('membership', ['Field'])
+        db.send_create_signal(u'membership', ['Field'])
 
         # Adding model 'FieldValue'
-        db.create_table('membership_fieldvalue', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+        db.create_table(u'membership_fieldvalue', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('field', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['membership.Field'])),
             ('member', self.gf('django.db.models.fields.related.ForeignKey')(related_name='attributes', to=orm['membership.Member'])),
             ('value', self.gf('django.db.models.fields.TextField')()),
         ))
-        db.send_create_signal('membership', ['FieldValue'])
+        db.send_create_signal(u'membership', ['FieldValue'])
+
+        # Adding model 'RankSubscriptionPlan'
+        db.create_table(u'membership_ranksubscriptionplan', (
+            (u'subscriptionplan_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['subscription.SubscriptionPlan'], unique=True, primary_key=True)),
+            ('rank', self.gf('django.db.models.fields.related.ForeignKey')(related_name='subscriptions', to=orm['membership.Rank'])),
+            ('member', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='rankSubscriptions', null=True, to=orm['membership.Member'])),
+            ('quantity', self.gf('django.db.models.fields.IntegerField')(default=1)),
+        ))
+        db.send_create_signal(u'membership', ['RankSubscriptionPlan'])
+
+        # Adding model 'RankLineItem'
+        db.create_table(u'membership_ranklineitem', (
+            (u'lineitem_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['payment.LineItem'], unique=True, primary_key=True)),
+            ('rank', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['membership.Rank'])),
+            ('member', self.gf('django.db.models.fields.related.ForeignKey')(related_name='rankLineItems', to=orm['membership.Member'])),
+            ('activeFromDate', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime(2014, 9, 30, 0, 0))),
+            ('activeToDate', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime(2014, 9, 30, 0, 0))),
+        ))
+        db.send_create_signal(u'membership', ['RankLineItem'])
+
+        # Adding model 'MembershipPeriod'
+        db.create_table(u'membership_membershipperiod', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('rank', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['membership.Rank'])),
+            ('member', self.gf('django.db.models.fields.related.ForeignKey')(related_name='membershipPeriods', to=orm['membership.Member'])),
+            ('activeFromDate', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime(2014, 9, 30, 0, 0))),
+            ('activeToDate', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime(2014, 9, 30, 0, 0))),
+            ('lineItem', self.gf('django.db.models.fields.related.ForeignKey')(default=None, to=orm['membership.RankLineItem'], null=True, blank=True)),
+        ))
+        db.send_create_signal(u'membership', ['MembershipPeriod'])
+
+        # Adding index on 'MembershipPeriod', fields ['activeFromDate', 'activeToDate']
+        db.create_index(u'membership_membershipperiod', ['activeFromDate', 'activeToDate'])
 
 
     def backwards(self, orm):
-        # Deleting model 'Member'
-        db.delete_table('membership_member')
+        # Removing index on 'MembershipPeriod', fields ['activeFromDate', 'activeToDate']
+        db.delete_index(u'membership_membershipperiod', ['activeFromDate', 'activeToDate'])
 
-        # Deleting model 'DuePayment'
-        db.delete_table('membership_duepayment')
+        # Deleting model 'UserResetToken'
+        db.delete_table(u'membership_userresettoken')
+
+        # Deleting model 'Member'
+        db.delete_table(u'membership_member')
 
         # Deleting model 'Rank'
-        db.delete_table('membership_rank')
+        db.delete_table(u'membership_rank')
 
         # Deleting model 'Field'
-        db.delete_table('membership_field')
+        db.delete_table(u'membership_field')
 
         # Deleting model 'FieldValue'
-        db.delete_table('membership_fieldvalue')
+        db.delete_table(u'membership_fieldvalue')
+
+        # Deleting model 'RankSubscriptionPlan'
+        db.delete_table(u'membership_ranksubscriptionplan')
+
+        # Deleting model 'RankLineItem'
+        db.delete_table(u'membership_ranklineitem')
+
+        # Deleting model 'MembershipPeriod'
+        db.delete_table(u'membership_membershipperiod')
 
 
     models = {
-        'auth.group': {
+        u'auth.group': {
             'Meta': {'object_name': 'Group'},
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '80'}),
-            'permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Permission']", 'symmetrical': 'False', 'blank': 'True'})
+            'permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['auth.Permission']", 'symmetrical': 'False', 'blank': 'True'})
         },
-        'auth.permission': {
-            'Meta': {'ordering': "('content_type__app_label', 'content_type__model', 'codename')", 'unique_together': "(('content_type', 'codename'),)", 'object_name': 'Permission'},
+        u'auth.permission': {
+            'Meta': {'ordering': "(u'content_type__app_label', u'content_type__model', u'codename')", 'unique_together': "((u'content_type', u'codename'),)", 'object_name': 'Permission'},
             'codename': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['contenttypes.ContentType']"}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '50'})
         },
-        'auth.user': {
+        u'auth.user': {
             'Meta': {'object_name': 'User'},
             'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
             'first_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
-            'groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Group']", 'symmetrical': 'False', 'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'groups': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "u'user_set'", 'blank': 'True', 'to': u"orm['auth.Group']"}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'is_staff': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'is_superuser': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             'last_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
             'password': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
-            'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Permission']", 'symmetrical': 'False', 'blank': 'True'}),
+            'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "u'user_set'", 'blank': 'True', 'to': u"orm['auth.Permission']"}),
             'username': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '30'})
         },
-        'contenttypes.contenttype': {
+        u'contenttypes.contenttype': {
             'Meta': {'ordering': "('name',)", 'unique_together': "(('app_label', 'model'),)", 'object_name': 'ContentType', 'db_table': "'django_content_type'"},
             'app_label': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
-        'membership.duepayment': {
-            'Meta': {'object_name': 'DuePayment'},
-            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'member': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'payments'", 'to': "orm['membership.Member']"}),
-            'rank': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'payments'", 'to': "orm['membership.Rank']"}),
-            'value': ('django.db.models.fields.FloatField', [], {})
-        },
-        'membership.field': {
+        u'membership.field': {
             'Meta': {'object_name': 'Field'},
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'multiple': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
+            'protected': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'public': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'required': ('django.db.models.fields.BooleanField', [], {'default': 'False'})
         },
-        'membership.fieldvalue': {
+        u'membership.fieldvalue': {
             'Meta': {'object_name': 'FieldValue'},
-            'field': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['membership.Field']"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'member': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'attributes'", 'to': "orm['membership.Member']"}),
+            'field': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['membership.Field']"}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'member': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'attributes'", 'to': u"orm['membership.Member']"}),
             'value': ('django.db.models.fields.TextField', [], {})
         },
-        'membership.member': {
+        u'membership.member': {
             'Meta': {'object_name': 'Member'},
-            'birthday': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'fields': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['membership.Field']", 'through': "orm['membership.FieldValue']", 'symmetrical': 'False'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'fields': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['membership.Field']", 'through': u"orm['membership.FieldValue']", 'symmetrical': 'False'}),
+            'hidden': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'lastSeen': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'profession': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'stripeID': ('django.db.models.fields.TextField', [], {}),
             'tagline': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'user': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['auth.User']", 'unique': 'True'})
+            'user': ('django.db.models.fields.related.OneToOneField', [], {'related_name': "'member'", 'unique': 'True', 'to': u"orm['auth.User']"})
         },
-        'membership.rank': {
+        u'membership.membershipperiod': {
+            'Meta': {'object_name': 'MembershipPeriod', 'index_together': "[['activeFromDate', 'activeToDate']]"},
+            'activeFromDate': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 9, 30, 0, 0)'}),
+            'activeToDate': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 9, 30, 0, 0)'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'lineItem': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'to': u"orm['membership.RankLineItem']", 'null': 'True', 'blank': 'True'}),
+            'member': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'membershipPeriods'", 'to': u"orm['membership.Member']"}),
+            'rank': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['membership.Rank']"})
+        },
+        u'membership.rank': {
             'Meta': {'object_name': 'Rank'},
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'group': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['auth.Group']", 'unique': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'group': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['auth.Group']", 'unique': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'isActiveMembership': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'isKeyholder': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'monthlyDues': ('django.db.models.fields.FloatField', [], {'default': '0'})
+        },
+        u'membership.ranklineitem': {
+            'Meta': {'object_name': 'RankLineItem', '_ormbases': [u'payment.LineItem']},
+            'activeFromDate': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 9, 30, 0, 0)'}),
+            'activeToDate': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 9, 30, 0, 0)'}),
+            u'lineitem_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['payment.LineItem']", 'unique': 'True', 'primary_key': 'True'}),
+            'member': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'rankLineItems'", 'to': u"orm['membership.Member']"}),
+            'rank': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['membership.Rank']"})
+        },
+        u'membership.ranksubscriptionplan': {
+            'Meta': {'object_name': 'RankSubscriptionPlan', '_ormbases': [u'subscription.SubscriptionPlan']},
+            'member': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'rankSubscriptions'", 'null': 'True', 'to': u"orm['membership.Member']"}),
+            'quantity': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
+            'rank': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'subscriptions'", 'to': u"orm['membership.Rank']"}),
+            u'subscriptionplan_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['subscription.SubscriptionPlan']", 'unique': 'True', 'primary_key': 'True'})
+        },
+        u'membership.userresettoken': {
+            'Meta': {'object_name': 'UserResetToken'},
+            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'token': ('django.db.models.fields.CharField', [], {'max_length': '10'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'resetTokens'", 'to': u"orm['auth.User']"})
+        },
+        u'payment.invoice': {
+            'Meta': {'object_name': 'Invoice'},
+            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'draft': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'dueDate': ('django.db.models.fields.DateField', [], {}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'open': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'invoices'", 'to': u"orm['auth.User']"})
+        },
+        u'payment.lineitem': {
+            'Meta': {'object_name': 'LineItem'},
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'invoice': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'items'", 'to': u"orm['payment.Invoice']"}),
+            'name': ('django.db.models.fields.TextField', [], {}),
+            'quantity': ('django.db.models.fields.FloatField', [], {'default': '1'}),
+            'unitPrice': ('django.db.models.fields.FloatField', [], {'default': '0'})
+        },
+        u'subscription.subscriptionperiod': {
+            'Meta': {'object_name': 'SubscriptionPeriod'},
+            'dayOfMonth': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'monthOfYear': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '255'})
+        },
+        u'subscription.subscriptionplan': {
+            'Meta': {'object_name': 'SubscriptionPlan'},
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'period': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['subscription.SubscriptionPeriod']"})
         }
     }
 

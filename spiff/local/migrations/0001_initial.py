@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import datetime
+from south.utils import datetime_utils as datetime
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
@@ -9,8 +9,8 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         # Adding model 'SpaceConfig'
-        db.create_table('local_spaceconfig', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+        db.create_table(u'local_spaceconfig', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('site', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['sites.Site'], unique=True)),
             ('logo', self.gf('django.db.models.fields.CharField')(default='/logo.png', max_length=100)),
             ('openIcon', self.gf('django.db.models.fields.CharField')(max_length=100, blank=True)),
@@ -22,73 +22,85 @@ class Migration(SchemaMigration):
             ('address', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
             ('status', self.gf('django.db.models.fields.CharField')(max_length=100, null=True, blank=True)),
             ('lastChange', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
+            ('openSensor', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['sensors.Sensor'], null=True, blank=True)),
+            ('motd', self.gf('django.db.models.fields.TextField')(blank=True)),
         ))
-        db.send_create_signal('local', ['SpaceConfig'])
+        db.send_create_signal(u'local', ['SpaceConfig'])
 
         # Adding model 'SpaceContact'
-        db.create_table('local_spacecontact', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+        db.create_table(u'local_spacecontact', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('space', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['local.SpaceConfig'])),
             ('name', self.gf('django.db.models.fields.CharField')(max_length=100)),
             ('value', self.gf('django.db.models.fields.CharField')(max_length=100)),
         ))
-        db.send_create_signal('local', ['SpaceContact'])
+        db.send_create_signal(u'local', ['SpaceContact'])
 
         # Adding model 'SpaceFeed'
-        db.create_table('local_spacefeed', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+        db.create_table(u'local_spacefeed', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('space', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['local.SpaceConfig'])),
             ('name', self.gf('django.db.models.fields.CharField')(max_length=100)),
             ('url', self.gf('django.db.models.fields.TextField')()),
         ))
-        db.send_create_signal('local', ['SpaceFeed'])
+        db.send_create_signal(u'local', ['SpaceFeed'])
 
 
     def backwards(self, orm):
         # Deleting model 'SpaceConfig'
-        db.delete_table('local_spaceconfig')
+        db.delete_table(u'local_spaceconfig')
 
         # Deleting model 'SpaceContact'
-        db.delete_table('local_spacecontact')
+        db.delete_table(u'local_spacecontact')
 
         # Deleting model 'SpaceFeed'
-        db.delete_table('local_spacefeed')
+        db.delete_table(u'local_spacefeed')
 
 
     models = {
-        'local.spaceconfig': {
+        u'local.spaceconfig': {
             'Meta': {'object_name': 'SpaceConfig'},
             'address': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'closedIcon': ('django.db.models.fields.CharField', [], {'max_length': '100', 'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'lastChange': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'lat': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
             'logo': ('django.db.models.fields.CharField', [], {'default': "'/logo.png'", 'max_length': '100'}),
             'lon': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
+            'motd': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'open': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'openIcon': ('django.db.models.fields.CharField', [], {'max_length': '100', 'blank': 'True'}),
-            'site': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['sites.Site']", 'unique': 'True'}),
+            'openSensor': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sensors.Sensor']", 'null': 'True', 'blank': 'True'}),
+            'site': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['sites.Site']", 'unique': 'True'}),
             'status': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'url': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'})
         },
-        'local.spacecontact': {
+        u'local.spacecontact': {
             'Meta': {'object_name': 'SpaceContact'},
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'space': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['local.SpaceConfig']"}),
+            'space': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['local.SpaceConfig']"}),
             'value': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
-        'local.spacefeed': {
+        u'local.spacefeed': {
             'Meta': {'object_name': 'SpaceFeed'},
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'space': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['local.SpaceConfig']"}),
+            'space': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['local.SpaceConfig']"}),
             'url': ('django.db.models.fields.TextField', [], {})
         },
-        'sites.site': {
-            'Meta': {'ordering': "('domain',)", 'object_name': 'Site', 'db_table': "'django_site'"},
+        u'sensors.sensor': {
+            'Meta': {'object_name': 'Sensor'},
+            'description': ('django.db.models.fields.TextField', [], {}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'ttl': ('django.db.models.fields.IntegerField', [], {'default': '255'}),
+            'type': ('django.db.models.fields.IntegerField', [], {})
+        },
+        u'sites.site': {
+            'Meta': {'ordering': "(u'domain',)", 'object_name': 'Site', 'db_table': "u'django_site'"},
             'domain': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '50'})
         }
     }

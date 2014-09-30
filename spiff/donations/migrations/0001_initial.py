@@ -16,7 +16,7 @@ class Migration(SchemaMigration):
 
         # Adding model 'DonationSubscriptionPlan'
         db.create_table(u'donations_donationsubscriptionplan', (
-            (u'subscriptionplan_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['payment.SubscriptionPlan'], unique=True, primary_key=True)),
+            (u'subscriptionplan_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['subscription.SubscriptionPlan'], unique=True, primary_key=True)),
             ('value', self.gf('django.db.models.fields.FloatField')()),
         ))
         db.send_create_signal(u'donations', ['DonationSubscriptionPlan'])
@@ -72,8 +72,8 @@ class Migration(SchemaMigration):
             u'lineitem_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['payment.LineItem']", 'unique': 'True', 'primary_key': 'True'})
         },
         u'donations.donationsubscriptionplan': {
-            'Meta': {'object_name': 'DonationSubscriptionPlan', '_ormbases': [u'payment.SubscriptionPlan']},
-            u'subscriptionplan_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['payment.SubscriptionPlan']", 'unique': 'True', 'primary_key': 'True'}),
+            'Meta': {'object_name': 'DonationSubscriptionPlan', '_ormbases': [u'subscription.SubscriptionPlan']},
+            u'subscriptionplan_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['subscription.SubscriptionPlan']", 'unique': 'True', 'primary_key': 'True'}),
             'value': ('django.db.models.fields.FloatField', [], {})
         },
         u'payment.invoice': {
@@ -93,19 +93,18 @@ class Migration(SchemaMigration):
             'quantity': ('django.db.models.fields.FloatField', [], {'default': '1'}),
             'unitPrice': ('django.db.models.fields.FloatField', [], {'default': '0'})
         },
-        u'payment.subscriptionperiod': {
+        u'subscription.subscriptionperiod': {
             'Meta': {'object_name': 'SubscriptionPeriod'},
             'dayOfMonth': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'monthOfYear': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '255'})
         },
-        u'payment.subscriptionplan': {
+        u'subscription.subscriptionplan': {
             'Meta': {'object_name': 'SubscriptionPlan'},
-            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'period': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['payment.SubscriptionPeriod']"})
+            'period': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['subscription.SubscriptionPeriod']"})
         }
     }
 
