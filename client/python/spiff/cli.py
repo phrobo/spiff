@@ -23,8 +23,7 @@ def argparser():
 
 def api_from_argv(argv=None, parser=None):
     if parser is None:
-        parser = argparse.ArgumentParser()
-    add_argument_group(parser)
+        parser = argparser()
     args = parser.parse_args(argv)
     return (api_from_args(args), args)
 
