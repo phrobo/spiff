@@ -5,7 +5,8 @@ Usage
    
    A much improved management interface is needed. There is very little
    high-level management functionality, and most administrative actions are
-   handled via the builtin Django admin interface, unless otherwise noted.
+   handled via the CLI or builtin Django admin interface, unless otherwise
+   noted.
    
    Patches and questions are welcome.
 
