@@ -15,7 +15,7 @@ In Brief
 
    $ pip install -r pip-requirements
 
-3. $ ./manage.py syncdb --migrate
+3. $ ./manage.py install
 
 4. Go nuts.
 
@@ -53,13 +53,13 @@ Apache
 ``````
 
 This section is included as an example to get Spiff and Apache to work
-together in harmony. It is more or less exactly how we run things at
+together in harmony. It is more or less exactly how we used to run things at
 synhak.org
 
 First, decide where you're going to serve up spiff. Keep in mind: this
 URL should probably never ever ever change in your space's lifetime. QR
 codes, hardware sensors, door swipes, and whatever else you have talking
-to Spiff will need reconfigured if things ever move. We run our instance
+to Spiff will need reconfigured if things ever move. We used to run our instance
 at https://synhak.org/auth/
 
 Our git clone of Spiff is located in /usr/share/spiff/.

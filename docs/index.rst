@@ -2,7 +2,7 @@ Spaceman Spiff Manages Spaces
 =============================
 
 :Author: Torrie Fischer <tdfischer@hackerbots.net>
-:Contact: irc://chat.freenode.net/#synhak
+:Contact: irc://chat.freenode.net/#noisebridge
 :Date: |today|
 :Version: |release|
 :Copyright: Public Domain
