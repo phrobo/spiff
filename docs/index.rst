@@ -11,14 +11,6 @@ Spaceman Spiff (or just Spiff) is a hackerspace management tool that helps
 hackers manage a hackerspace. It comes with a builtin web interface for end
 users, but is also exceptionally machine friendly.
 
-Management of a hackerspace includes several topics:
-
-- Membership
-- Documentation
-- Communication
-- Infrastructure
-- Governance
-
 It is made available to the public under the AGPL.
 
 Dependencies
@@ -54,6 +46,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   what-is-spiff
    installation
    usage
    permissions
