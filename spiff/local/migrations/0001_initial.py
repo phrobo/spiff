@@ -7,6 +7,10 @@ from django.db import models
 
 class Migration(SchemaMigration):
 
+    depends_on = (
+        ("sensors", "0001_initial"),
+    )
+
     def forwards(self, orm):
         # Adding model 'SpaceConfig'
         db.create_table(u'local_spaceconfig', (
