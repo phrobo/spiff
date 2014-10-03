@@ -1,8 +1,8 @@
-from tastypie.api import Api
-from spiff.api.plugins import find_api_classes
-from tastypie.resources import Resource
+import tastypie.resources
+import tastypie.api
+import spiff.api.plugins
 
-v1_api = Api(api_name='v1')
-for api in find_api_classes('v1_api', Resource, lambda x:hasattr(x, 'Meta')):
+v1_api = tastypie.api.Api(api_name='v1')
+for api in spiff.api.plugins.find_api_classes('v1_api', tastypie.resources.Resource, lambda x:hasattr(x, 'Meta')):
   v1_api.register(api())
 

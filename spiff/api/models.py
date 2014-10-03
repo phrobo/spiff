@@ -2,8 +2,8 @@ from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from south.signals import post_migrate
 from django.db.models.signals import post_syncdb
-from spiff.api.plugins import find_api_classes
-from tastypie.resources import ModelResource
+import tastypie.resources
+import spiff.api.plugins
 from spiff.api import SpiffAuthorization
 from spiff import funcLog
 
@@ -13,7 +13,7 @@ def add_resource_permissions(*args, **kwargs):
   content types.
   """
   # for each of our content types
-  for resource in find_api_classes('v1_api', ModelResource):
+  for resource in spiff.api.plugins.find_api_classes('v1_api', tastypie.resources.ModelResource):
     auth = resource._meta.authorization
     content_type = ContentType.objects.get_for_model(resource._meta.queryset.model)
     if isinstance(auth, SpiffAuthorization):
