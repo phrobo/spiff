@@ -46,16 +46,8 @@ tr.invoice-total {
   margin: 10px 0;
 }
 
-#footer .SYN {
-  color: #F56F22;
-}
-
-#footer .HAK {
-  color: #0066D6;
-}
-
-#footer .synhak-link {
-  color: #000;
+#footer .noisebridge-link {
+  color: #f00;
   font-weight: bold;
 }
 
