@@ -61,8 +61,7 @@ class ListCommand(Command):
     @staticmethod
     def addArgs(parser):
         parser.add_argument('type')
-        parser.add_argument('format_or_param', nargs='*', default=[],
-        action='append')
+        parser.add_argument('format_or_param', nargs='*', default=[])
 
 class GetCommand(Command):
     def run(self):
@@ -79,7 +78,7 @@ class GetCommand(Command):
     def addArgs(parser):
         parser.add_argument('type')
         parser.add_argument('id')
-        parser.add_argument('format', nargs='?', default=[], action='append')
+        parser.add_argument('format', nargs='?', default=[])
 
 class UpdateCommand(Command):
     def run(self):
@@ -101,7 +100,7 @@ class UpdateCommand(Command):
     def addArgs(parser):
         parser.add_argument('type')
         parser.add_argument('id')
-        parser.add_argument('property', nargs='*', default=[], action='append')
+        parser.add_argument('property', nargs='+', default=[])
 
 class CreateCommand(Command):
     def run(self):
@@ -122,7 +121,7 @@ class CreateCommand(Command):
     @staticmethod
     def addArgs(parser):
         parser.add_argument('type')
-        parser.add_argument('property', nargs='*', default=[], action='append')
+        parser.add_argument('property', nargs='*', default=[])
 
 class DeleteCommand(Command):
     def run(self):
