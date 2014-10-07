@@ -3,8 +3,8 @@ angular.module('spiff.dashboard', [
   'spiff'
 ])
 
-.controller('DashboardRegistrationCtrl', function($scope, $location) {
-  $scope.$watch('Spiff.currentUser', function(user) {
+.controller('DashboardRegistrationCtrl', function(Spiff, $location) {
+  Spiff.getCurrentUser().then(function(user) {
     if (user && !user.isAnonymous) {
       $location.url('/members/'+user.id);
     }
@@ -81,13 +81,12 @@ angular.module('spiff.dashboard', [
   $scope.cancel = function() {$modalInstance.close()};
 })
 
-.controller('DashboardCtrl', function($scope, SpiffRestangular, $location, $modal) {
-  console.log('dash');
-  $scope.$watch('Spiff.currentUser', function(user) {
-    console.log(user);
+.controller('DashboardCtrl', function(SpiffRestangular, $location, Spiff, $modal) {
+  Spiff.getCurrentUser().then(function(user) {
     if (user && !user.isAnonymous) {
       $location.url('/members/'+user.id);
     } else if (!user || (user && user.isAnonymous)) {
+      console.log(user);
       $location.url('/welcome');
     }
   });
@@ -105,8 +104,9 @@ angular.module('spiff.dashboard', [
     }
   });
 
-  Spiff.$watch('currentUser', function(user) {
+  Spiff.getCurrentUser().then(function(user) {
     if (user && !user.isAnonymous) {
+      console.log(user);
       $location.url('/');
     }
   });

@@ -115,6 +115,18 @@ Spiff.provider('Spiff', function() {
       });
     }
 
+    scope.getCurrentUser = function() {
+      var ret = $q.defer();
+      if (scope.currentUser) {
+        ret.resolve(scope.currentUser);
+      } else {
+        scope.login().then(function() {
+          ret.resolve(scope.currentUser);
+        });
+      }
+      return ret.promise;
+    }
+
     scope.login = function(username, password) {
       if (password === undefined) {
         return scope.refreshUser();

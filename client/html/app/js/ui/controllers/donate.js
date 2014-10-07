@@ -17,9 +17,9 @@ angular.module('spiff.donate', [
   }
 })
 
-.controller('DonationRegistrationCtrl', function($scope, $modal, SpiffRestangular, $stateParams) {
+.controller('DonationRegistrationCtrl', function(Spiff, $modal, SpiffRestangular, $stateParams) {
   var plan = SpiffRestangular.one('donationplan', $stateParams.planID);
-  $scope.$watch('Spiff.currentUser', function(user) {
+  Spiff.getCurrentUser().then(function(user) {
     if (user && !user.isAnonymous) {
       $modal.open({
         templateUrl: 'donate/modal/add.html',
