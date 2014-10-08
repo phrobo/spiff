@@ -106,14 +106,38 @@ Spiff.provider('SpiffConfig', function() {
 
 Spiff.provider('Spiff', function() {
 
-  this.$get = function(SpaceAPI, SpiffConfig, SpiffRestangular, $q, $rootScope, $http) {
+  this.$get = function(SpaceAPI, SpiffRestangular, SpiffConfig, $q, $rootScope, $http) {
     var scope = $rootScope.$new();
+
+    scope.getSchemas = function() {
+      var ret = $q.defer();
+      var authHeader = 'Bearer '+SpiffConfig.getAuthToken();
+
+      $http.get(SpiffConfig.baseUrl+'/', {'headers': {'Authorization': authHeader}}).success(function(schema) {
+        ret.resolve(schema);
+      });
+      //FIXME: handle error
+
+      return ret.promise;
+    };
+
+    scope.getSchema = function(type) {
+      var ret = $q.defer();
+      var authHeader = 'Bearer '+SpiffConfig.getAuthToken();
+
+      $http.get(SpiffConfig.baseUrl+'/'+type+'/schema/', {'headers': {'Authorization': authHeader}}).success(function(schema) {
+        ret.resolve(schema);
+      });
+      //FIXME: handle error
+
+      return ret.promise;
+    };
 
     scope.refreshUser = function() {
       return SpiffRestangular.one('member', 'self').get().then(function(user) {
         scope.currentUser = user;
       });
-    }
+    };
 
     scope.getCurrentUser = function() {
       var ret = $q.defer();
@@ -125,7 +149,7 @@ Spiff.provider('Spiff', function() {
         });
       }
       return ret.promise;
-    }
+    };
 
     scope.login = function(username, password) {
       if (password === undefined) {
