@@ -188,12 +188,14 @@ class MembershipPeriodResource(ModelResource):
     }
 
 class MemberResource(ModelResource):
-  user = fields.ToOneField(UserResource, 'user', full=False)
-  username = fields.CharField(attribute='user__username')
-  firstName = fields.CharField(attribute='user__first_name', null=True)
-  lastName = fields.CharField(attribute='user__last_name')
+  user = fields.ToOneField(UserResource, 'user', full=False,
+  help_text="Associated User object")
+  username = fields.CharField(attribute='user__username', help_text="Login Username")
+  firstName = fields.CharField(attribute='user__first_name', null=True,
+      help_text="First name")
+  lastName = fields.CharField(attribute='user__last_name', help_text="Last name")
   activeMember = fields.BooleanField(attribute='activeMember',
-      readonly=True)
+      readonly=True, help_text='Whether or a not someone is in a group with the isActiveMembership bit set')
   isAnonymous = fields.BooleanField(attribute='isAnonymous')
   email = fields.CharField(attribute='user__email')
   groups = fields.ToManyField(GroupResource, 'user__groups', null=True,
