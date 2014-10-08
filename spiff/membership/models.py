@@ -42,6 +42,7 @@ class Member(models.Model):
   fields = models.ManyToManyField('Field', through='FieldValue')
   stripeID = models.TextField()
   hidden = models.BooleanField(default=False)
+  displayName = models.TextField()
 
   @property
   def availableCredit(self):
@@ -100,7 +101,7 @@ class Member(models.Model):
     if self.hidden:
       return "Anonymous"
     else:
-      return "%s %s"%(self.user.first_name, self.user.last_name)
+      return self.displayName
 
   @property
   def outstandingBalance(self):
@@ -144,7 +145,7 @@ class Member(models.Model):
   def __unicode__(self):
     if self.hidden:
       return "Anonymous"
-    return "%s, %s"%(self.user.last_name, self.user.first_name)
+    return self.displayName
 
 class Rank(models.Model):
   description = models.TextField(blank=True)
@@ -393,8 +394,7 @@ def get_anonymous_user():
         username='anonymous',
         email='anonymous@example.com',
         password='',
-        first_name='Guest',
-        last_name='McGuesterson',
+        displayName='Guest McGuesterson',
       )
       user.set_unusable_password()
       user.save()

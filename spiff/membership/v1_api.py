@@ -150,8 +150,6 @@ class UserResource(ModelResource):
     authorization = SelfUserAuthorization()
     always_return_data = True
     filtering = {
-      'first_name': ALL_WITH_RELATIONS,
-      'last_name': ALL_WITH_RELATIONS,
       'username': ALL_WITH_RELATIONS,
       'permissions': ALL_WITH_RELATIONS
     }
@@ -191,9 +189,8 @@ class MemberResource(ModelResource):
   user = fields.ToOneField(UserResource, 'user', full=False,
   help_text="Associated User object")
   username = fields.CharField(attribute='user__username', help_text="Login Username")
-  firstName = fields.CharField(attribute='user__first_name', null=True,
-      help_text="First name")
-  lastName = fields.CharField(attribute='user__last_name', help_text="Last name")
+  displayName = fields.CharField(attribute='displayName', null=True,
+      help_text="Display name")
   activeMember = fields.BooleanField(attribute='activeMember',
       readonly=True, help_text='Whether or a not someone is in a group with the isActiveMembership bit set')
   isAnonymous = fields.BooleanField(attribute='isAnonymous')
@@ -216,8 +213,7 @@ class MemberResource(ModelResource):
     always_return_data = True
     filtering = {
       'groups': ALL_WITH_RELATIONS,
-      'firstName': ALL_WITH_RELATIONS,
-      'lastName': ALL_WITH_RELATIONS,
+      'displayName': ALL_WITH_RELATIONS,
     }
 
   def obj_update(self, bundle, **kwargs):
@@ -238,18 +234,11 @@ class MemberResource(ModelResource):
 
   def obj_create(self, bundle, **kwargs):
     data = bundle.data
-    firstName = ""
-    lastName = ""
     funcLog().debug("Creating user from %r", data)
-    if 'firstName' in data:
-      firstName = data['firstName']
-    if 'lastName' in data:
-      lastName = data['lastName']
     u = User.objects.create(
       username = data['username'],
       email = data['email'],
-      first_name = firstName,
-      last_name = lastName
+      displayName = data['displayName']
     )
     u.set_password(data['password'])
     u.save()
@@ -337,13 +326,8 @@ class MemberResource(ModelResource):
     self.is_authenticated(request)
     self.throttle_check(request)
 
-    name = request.GET['fullName'].split(' ')
     query = Q()
-    if len(name) == 1:
-      query &= Q(first_name__icontains=name[0]) | Q(last_name__icontains=name[0])
-    else:
-      query &= Q(first_name__icontains=name[0]) | Q(last_name__icontains=' '.join(name[1:]))
-      firstName, lastName = request.GET['fullName'].split(' ', 1)
+    query &= Q(member__displayName__icontains=request.GET['fullName'])
     query &= Q(member__hidden=False)
     funcLog().info("User search query: %s", query)
     users = User.objects.filter(query)
