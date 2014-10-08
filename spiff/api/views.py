@@ -18,7 +18,7 @@ def spaceapi(request):
     base = "%s:%s"%(base, request.META['SERVER_PORT'])
   meta['x-spiff-url'] = "%s%s"%(base, reverse('root'))
 
-  spaceConfig = SpaceConfig.objects.get(site=site)
+  spaceConfig,created = SpaceConfig.objects.get_or_create(site=site)
 
   meta['space'] = site.name
   meta['logo'] = spaceConfig.logo
