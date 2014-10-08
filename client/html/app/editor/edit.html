@@ -1,0 +1,39 @@
+<div class="row">
+  <div class="span12">
+    <a ui-sref="editor">{{spaceAPI['space']}}</a> &raquo;
+    <span ng-include="'editor/_schema-selector.html'"></span> &raquo;
+    <a ui-sref="editor.list({type: type})">All {{type}}</a> &raquo;
+    <big>Editing {{type}} #{{id}}</big>
+  </div>
+</div>
+<div class="row">
+  <div class="span12">
+    <form class="form-horizontal" ng-submit="submit()">
+      <table class="table table-hover">
+        <tr>
+          <th>Field</th>
+          <th>Value</th>
+        </tr>
+        <tr ng-repeat="(fieldName, field) in schema.fields">
+          <th title="{{field.help_text}}">
+            {{fieldName}}
+            <small ng-if="field.unique">unique</small>
+            <small ng-if="field.nullable">nullable</small>
+            <small class="field-type-{{field.type}}">{{field.type}}</small>
+          </th>
+          <td>
+            <input type="checkbox" ng-readonly="field.readonly" ng-model="object[fieldName]" ng-if="field.type == 'boolean'"/>
+            <input type="number" ng-readonly="field.readonly" ng-model="object[fieldName]" ng-if="field.type == 'integer' || field.type == 'float'"/>
+            <input type="text" ng-readonly="field.readonly" ng-model="object[fieldName]" ng-if="field.type == 'string'"/>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            <button class="btn btn-primary">Save</button>
+          </td>
+      </table>
+    </form>
+  </div>
+</div>
+
+

@@ -1,0 +1,18 @@
+<div class="row">
+  <div class="span12">
+    <a ui-sref="editor">{{spaceAPI['space']}}</a> &raquo;
+    <span ng-include="'editor/_schema-selector.html'"></span> &raquo;
+    <big>All {{type}}</big> &raquo;
+  </div>
+</div>
+<div class="row">
+  <div class="span12">
+    <h2>Objects of type "{{type}}"</h2>
+    <ul>
+      <li ng-repeat="obj in objects">
+        <a ui-sref="editor.edit({type: type, id: obj.id})">{{obj.id}}</a>
+      </li>
+    </ul>
+  </div>
+</div>
+

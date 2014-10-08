@@ -58,3 +58,15 @@ tr.invoice-total {
 #welcome-page {
   background: url(../logo.png) no-repeat top right;
 }
+
+.field-type-float, .field-type-integer, .field-type-boolean {
+  color: #00a;
+}
+
+.field-type-datetime, .field-type-related, .field-type-list {
+  color: #0a0;
+}
+
+.field-type-string {
+  color: #a00;
+}

@@ -10,6 +10,7 @@ var spiffApp = angular.module('spiffApp', [
   'spiff.donate',
   'spiff.sensors',
   'spiff.payment',
+  'spiff.editor',
   'ngRoute',
   'ui.gravatar',
   'md5',
@@ -106,6 +107,21 @@ spiffApp.config(function($stateProvider, $urlRouterProvider, RestangularProvider
       url: '/register',
       templateUrl: 'register.html',
       controller: 'DashboardRegistrationCtrl'
+    })
+    .state('editor', {
+      url: '/editor',
+      templateUrl: 'editor/index.html',
+      controller: 'EditorDashboardCtrl',
+    })
+    .state('editor.list', {
+      url: '/list/:type',
+      templateUrl: 'editor/list.html',
+      controller: 'EditorListCtrl',
+    })
+    .state('editor.edit', {
+      url: '/edit/:type/:id',
+      templateUrl: 'editor/edit.html',
+      controller: 'EditorEditorCtrl',
     });
 });
 
