@@ -158,8 +158,11 @@ class UserResource(ModelResource):
     perms = []
     for perm in bundle.data['permissions']:
       if isinstance(perm, basestring):
-        app, codename = perm.split('.')
-        perms.append(Permission.objects.get(content_type__app_label=app, codename=codename))
+        try:
+          perms.append(PermissionResource().get_via_uri(perm, bundle.request))
+        except Permission.DoesNotExist:
+          app, codename = perm.split('.')
+          perms.append(Permission.objects.get(content_type__app_label=app, codename=codename))
       else:
         perms.append(perm)
     bundle.data['permissions'] = perms
