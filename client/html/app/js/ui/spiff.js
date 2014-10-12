@@ -121,6 +121,11 @@ Spiff.provider('Spiff', function() {
       return ret.promise;
     };
 
+    scope.federations = [];
+    SpiffRestangular.all('federation').getList().then(function(federations) {
+      scope.federations = federations;
+    });
+
     scope.getSchema = function(type) {
       var ret = $q.defer();
       var authHeader = 'Bearer '+SpiffConfig.getAuthToken();
