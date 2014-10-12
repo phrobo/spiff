@@ -9,6 +9,7 @@
   <div class="span12">
     <h2>Objects of type "{{type}}"</h2>
     <ul>
+      <li><a ui-sref="editor.new({type:type})">Create New</a></li>
       <li ng-repeat="obj in objects">
         <a ui-sref="editor.edit({type: type, id: obj.id})">{{obj.id}}</a>
       </li>

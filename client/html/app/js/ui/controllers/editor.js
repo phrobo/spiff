@@ -17,19 +17,29 @@ angular.module('spiff.editor', [
     $scope.objects = objs;
   });
 })
-.controller('EditorEditorCtrl', function($scope, Spiff, SpiffRestangular, $stateParams) {
+.controller('EditorEditorCtrl', function($location, $scope, Spiff, SpiffRestangular, $stateParams) {
   $scope.type = $stateParams.type;
-  $scope.id = $stateParams.id;
-  SpiffRestangular.one($stateParams.type, $stateParams.id).get().then(function(object) {
-    $scope.object = object;
-    Spiff.getSchema($stateParams.type).then(function(schema) {
-      $scope.schema = schema;
-    });
-
+  Spiff.getSchema($stateParams.type).then(function(schema) {
+    $scope.schema = schema;
+    console.log($scope.schema);
+    if ('id' in $stateParams) {
+      $scope.id = $stateParams.id;
+      SpiffRestangular.one($stateParams.type, $stateParams.id).get().then(function(object) {
+        $scope.object = object;
+      });
+    } else {
+      $scope.object = {};
+    }
   });
 
   $scope.submit = function() {
-    console.log($scope.object);
-    $scope.object.save();
+    if ('id' in $stateParams) {
+      $scope.object.save();
+    } else {
+      SpiffRestangular.all($scope.type).post($scope.object).then(function(result) {
+        console.log(result);
+        $location.url('/editor/edit/'+$scope.type+'/'+result.id);
+      });
+    }
   };
 });

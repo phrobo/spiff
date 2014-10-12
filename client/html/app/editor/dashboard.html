@@ -9,6 +9,7 @@
     <ul>
       <li ng-repeat="(name, url) in schemas">
         <a ui-sref="editor.list({type: name})">{{name}}</a>
+        (<a ui-sref="editor.new({type: name})">New</a>)
       </li>
     </ul>
   </div>

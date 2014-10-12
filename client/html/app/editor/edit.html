@@ -3,7 +3,8 @@
     <a ui-sref="editor">{{spaceAPI['space']}}</a> &raquo;
     <span ng-include="'editor/_schema-selector.html'"></span> &raquo;
     <a ui-sref="editor.list({type: type})">All {{type}}</a> &raquo;
-    <big>Editing {{type}} #{{id}}</big>
+    <big ng-if="id">Editing {{type}} #{{id}}</big>
+    <big ng-if="!id">Creating new {{type}}</big>
   </div>
 </div>
 <div class="row">
@@ -19,11 +20,12 @@
             {{fieldName}}
             <small ng-if="field.unique">unique</small>
             <small ng-if="field.nullable">nullable</small>
+            <small ng-if="!field.required">required</small>
             <small class="field-type-{{field.type}}">{{field.type}}</small>
           </th>
           <td>
             <input type="checkbox" ng-readonly="field.readonly" ng-model="object[fieldName]" ng-if="field.type == 'boolean'"/>
-            <input type="number" ng-readonly="field.readonly" ng-model="object[fieldName]" ng-if="field.type == 'integer' || field.type == 'float'"/>
+            <input type="number" ng-readonly="field.readonly || fieldName == 'id'" ng-model="object[fieldName]" ng-if="field.type == 'integer' || field.type == 'float'"/>
             <input type="text" ng-readonly="field.readonly" ng-model="object[fieldName]" ng-if="field.type == 'string'"/>
           </td>
         </tr>
@@ -31,6 +33,7 @@
           <td colspan="2">
             <button class="btn btn-primary">Save</button>
           </td>
+        </tr>
       </table>
     </form>
   </div>

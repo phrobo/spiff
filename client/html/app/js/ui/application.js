@@ -113,6 +113,11 @@ spiffApp.config(function($stateProvider, $urlRouterProvider, RestangularProvider
       templateUrl: 'editor/index.html',
       controller: 'EditorDashboardCtrl',
     })
+    .state('editor.new', {
+      url: '/new/:type',
+      templateUrl: 'editor/edit.html',
+      controller: 'EditorEditorCtrl',
+    })
     .state('editor.list', {
       url: '/list/:type',
       templateUrl: 'editor/list.html',
