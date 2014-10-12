@@ -115,8 +115,9 @@ class PermissionResource(ModelResource):
     }
 
 class GroupResource(ModelResource):
-  rank = fields.ToOneField(RankResource, 'rank', full=True)
-  permissions = fields.ToManyField(PermissionResource, 'permissions', full=False)
+  rank = fields.ToOneField(RankResource, 'rank', full=True, blank=True)
+  permissions = fields.ToManyField(PermissionResource, 'permissions',
+      full=False, blank=True)
 
   class Meta:
     queryset = Group.objects.all()
