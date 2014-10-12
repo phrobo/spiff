@@ -14,6 +14,7 @@ users:
       - sensors.read_sensor
       - sensors.read_sensorvalue
       - membership.read_public_fieldvalue
+      - federation.read_federation
 groups:
   Authenticated Users:
     permissions:
