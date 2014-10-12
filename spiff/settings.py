@@ -145,6 +145,7 @@ INSTALLED_APPS = (
     'spiff.sensors',
     'spiff.payment',
     'spiff.federation',
+    'spiff.unwelcome',
     'django_nose',
     'corsheaders',
 )
