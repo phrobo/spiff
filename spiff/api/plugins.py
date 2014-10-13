@@ -22,7 +22,11 @@ def find_api_classes(*args, **kwargs):
     yield cls
 
 def find_api_implementations(module, superclass, test=lambda x: True):
-  for app in map(lambda x:'%s.%s'%(x, module), settings.INSTALLED_APPS):
+  if module == '.':
+    mapper = lambda x:x
+  else:
+    mapper = lambda x:'.'.join((x, module))
+  for app in map(mapper, settings.INSTALLED_APPS):
     try:
       appAPI = importlib.import_module(app)
     except ImportError:
@@ -32,10 +36,11 @@ def find_api_implementations(module, superclass, test=lambda x: True):
         yield (app, cls)
 
 def find_apps():
-  return [x[1]() for x in find_api_implementations('app', SpiffApp)]
+  for app in find_api_implementations('.', SpiffApp):
+    return [x[1]() for x in find_api_implementations('.', SpiffApp)]
 
-def find_app(id):
-  ret = list(find_api_classes('app', SpiffApp, lambda x:x().id==id))
+def find_app(id, filter=[]):
+  ret = list(find_api_classes('.', SpiffApp, lambda x:x().id==id))
   if len(ret):
     return ret[0]()
   raise KeyError("Unknown app "+repr(id))
