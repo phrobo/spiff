@@ -226,6 +226,10 @@ Spiff is a tool for managing hackerspaces. It provides nice things like:
 
 WEBUI_URL = "http://localhost/"
 
+# Used with the spiff.sensors app to automatically configure the 'open' property
+# in /status.json
+SPACEAPI_OPEN_SENSOR_ID = None
+
 try:
   from local_settings import *
 except ImportError:

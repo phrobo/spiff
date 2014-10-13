@@ -7,6 +7,9 @@ class SpiffApp(object):
     self.id = id;
     self.version = version
 
+  def filterSpaceAPI(self, api):
+    return api
+
   @classmethod
   def new(cls, id, version):
     class AppClass(SpiffApp):

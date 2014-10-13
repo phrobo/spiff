@@ -4,7 +4,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from spiff.local.models import SpaceConfig, SpaceContact, SpaceFeed
 from spiff.membership.models import Rank
-from spiff.sensors.models import SENSOR_TYPES, Sensor
+from spiff.api.plugins import find_apps
 import json
 import random
 
@@ -26,9 +26,6 @@ def spaceapi(request):
   meta['url'] = site.domain
   meta['open'] = spaceConfig.isOpen()
 
-  if spaceConfig.openSensor is not None:
-      meta['x-spiff-open-sensor'] = spaceConfig.openSensor.id
-
   meta['address'] = spaceConfig.address
   meta['lat'] = spaceConfig.lat
   meta['lon'] = spaceConfig.lon
@@ -43,25 +40,13 @@ def spaceapi(request):
     contacts[c.name] = c.value
   meta['contact'] = contacts
 
-  keyholders = []
-  for r in Rank.objects.filter(isKeyholder=True):
-    for u in r.group.user_set.all():
-      keyholders.append(str(u.member))
-
-  meta['contact']['keymaster'] = keyholders
-
   feeds = []
   for f in SpaceFeed.objects.filter(space=spaceConfig):
     feeds.append({'name': f.name, 'url': f.url})
   meta['feeds'] = feeds
 
-  sensors = {}
-  for t in SENSOR_TYPES:
-    sensors[t[1]] = []
-    for s in Sensor.objects.filter(type=t[0]):
-      v = s.value()
-      sensors[t[1]].append({s.name: v})
-  meta['sensors'] = sensors
+  for app in find_apps():
+    meta = app.filterSpaceAPI(meta)
 
   data = json.dumps(meta, indent=True)
   resp = HttpResponse(data)
