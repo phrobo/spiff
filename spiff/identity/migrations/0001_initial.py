@@ -17,8 +17,8 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal(u'identity', ['UserResetToken'])
 
-        # Adding model 'Member'
-        db.create_table(u'identity_member', (
+        # Adding model 'Identity'
+        db.create_table(u'identity_identity', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('tagline', self.gf('django.db.models.fields.CharField')(max_length=255)),
             ('user', self.gf('django.db.models.fields.related.OneToOneField')(related_name='member', unique=True, to=orm['auth.User'])),
@@ -27,7 +27,7 @@ class Migration(SchemaMigration):
             ('hidden', self.gf('django.db.models.fields.BooleanField')(default=False)),
             ('displayName', self.gf('django.db.models.fields.TextField')()),
         ))
-        db.send_create_signal(u'identity', ['Member'])
+        db.send_create_signal(u'identity', ['Identity'])
 
         # Adding model 'Rank'
         db.create_table(u'identity_rank', (
@@ -55,7 +55,7 @@ class Migration(SchemaMigration):
         db.create_table(u'identity_fieldvalue', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('field', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['identity.Field'])),
-            ('member', self.gf('django.db.models.fields.related.ForeignKey')(related_name='attributes', to=orm['identity.Member'])),
+            ('member', self.gf('django.db.models.fields.related.ForeignKey')(related_name='attributes', to=orm['identity.Identity'])),
             ('value', self.gf('django.db.models.fields.TextField')()),
         ))
         db.send_create_signal(u'identity', ['FieldValue'])
@@ -64,7 +64,7 @@ class Migration(SchemaMigration):
         db.create_table(u'identity_ranksubscriptionplan', (
             (u'subscriptionplan_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['subscription.SubscriptionPlan'], unique=True, primary_key=True)),
             ('rank', self.gf('django.db.models.fields.related.ForeignKey')(related_name='subscriptions', to=orm['identity.Rank'])),
-            ('member', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='rankSubscriptions', null=True, to=orm['identity.Member'])),
+            ('member', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='rankSubscriptions', null=True, to=orm['identity.Identity'])),
             ('quantity', self.gf('django.db.models.fields.IntegerField')(default=1)),
         ))
         db.send_create_signal(u'identity', ['RankSubscriptionPlan'])
@@ -73,7 +73,7 @@ class Migration(SchemaMigration):
         db.create_table(u'identity_ranklineitem', (
             (u'lineitem_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['payment.LineItem'], unique=True, primary_key=True)),
             ('rank', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['identity.Rank'])),
-            ('member', self.gf('django.db.models.fields.related.ForeignKey')(related_name='rankLineItems', to=orm['identity.Member'])),
+            ('member', self.gf('django.db.models.fields.related.ForeignKey')(related_name='rankLineItems', to=orm['identity.Identity'])),
             ('activeFromDate', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime(2014, 10, 13, 0, 0))),
             ('activeToDate', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime(2014, 10, 13, 0, 0))),
         ))
@@ -83,7 +83,7 @@ class Migration(SchemaMigration):
         db.create_table(u'identity_membershipperiod', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('rank', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['identity.Rank'])),
-            ('member', self.gf('django.db.models.fields.related.ForeignKey')(related_name='membershipPeriods', to=orm['identity.Member'])),
+            ('member', self.gf('django.db.models.fields.related.ForeignKey')(related_name='membershipPeriods', to=orm['identity.Identity'])),
             ('activeFromDate', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime(2014, 10, 13, 0, 0))),
             ('activeToDate', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime(2014, 10, 13, 0, 0))),
             ('lineItem', self.gf('django.db.models.fields.related.ForeignKey')(default=None, to=orm['identity.RankLineItem'], null=True, blank=True)),
@@ -101,8 +101,8 @@ class Migration(SchemaMigration):
         # Deleting model 'UserResetToken'
         db.delete_table(u'identity_userresettoken')
 
-        # Deleting model 'Member'
-        db.delete_table(u'identity_member')
+        # Deleting model 'Identity'
+        db.delete_table(u'identity_identity')
 
         # Deleting model 'Rank'
         db.delete_table(u'identity_rank')
@@ -173,11 +173,11 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'FieldValue'},
             'field': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['identity.Field']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'member': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'attributes'", 'to': u"orm['identity.Member']"}),
+            'member': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'attributes'", 'to': u"orm['identity.Identity']"}),
             'value': ('django.db.models.fields.TextField', [], {})
         },
-        u'identity.member': {
-            'Meta': {'object_name': 'Member'},
+        u'identity.identity': {
+            'Meta': {'object_name': 'Identity'},
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'displayName': ('django.db.models.fields.TextField', [], {}),
             'fields': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['identity.Field']", 'through': u"orm['identity.FieldValue']", 'symmetrical': 'False'}),
@@ -193,7 +193,7 @@ class Migration(SchemaMigration):
             'activeToDate': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 10, 13, 0, 0)'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'lineItem': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'to': u"orm['identity.RankLineItem']", 'null': 'True', 'blank': 'True'}),
-            'member': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'membershipPeriods'", 'to': u"orm['identity.Member']"}),
+            'member': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'membershipPeriods'", 'to': u"orm['identity.Identity']"}),
             'rank': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['identity.Rank']"})
         },
         u'identity.rank': {
@@ -210,12 +210,12 @@ class Migration(SchemaMigration):
             'activeFromDate': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 10, 13, 0, 0)'}),
             'activeToDate': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 10, 13, 0, 0)'}),
             u'lineitem_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['payment.LineItem']", 'unique': 'True', 'primary_key': 'True'}),
-            'member': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'rankLineItems'", 'to': u"orm['identity.Member']"}),
+            'member': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'rankLineItems'", 'to': u"orm['identity.Identity']"}),
             'rank': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['identity.Rank']"})
         },
         u'identity.ranksubscriptionplan': {
             'Meta': {'object_name': 'RankSubscriptionPlan', '_ormbases': [u'subscription.SubscriptionPlan']},
-            'member': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'rankSubscriptions'", 'null': 'True', 'to': u"orm['identity.Member']"}),
+            'member': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'rankSubscriptions'", 'null': 'True', 'to': u"orm['identity.Identity']"}),
             'quantity': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
             'rank': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'subscriptions'", 'to': u"orm['identity.Rank']"}),
             u'subscriptionplan_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['subscription.SubscriptionPlan']", 'unique': 'True', 'primary_key': 'True'})

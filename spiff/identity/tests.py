@@ -55,7 +55,7 @@ class MembershipPeriodTest(APITestMixin):
         datetime.date.today())
     self.assertEqual(membershipPeriod.activeToDate.date(), datetime.date.today())
 
-  @withPermission('identity.read_member')
+  @withPermission('identity.read_identity')
   @withPermission('auth.read_group')
   @withPermission('identity.create_membershipperiod')
   @withPermission('identity.read_rank')
@@ -135,10 +135,10 @@ class MemberTest(TestCase):
 
   def testCreateAnonUser(self):
     userCount = len(User.objects.all())
-    memberCount = len(models.Member.objects.all())
+    memberCount = len(models.Identity.objects.all())
     anonUser = models.get_anonymous_user()
     newUserCount = len(User.objects.all())
-    newMemberCount = len(models.Member.objects.all())
+    newMemberCount = len(models.Identity.objects.all())
     self.assertEqual(userCount, newUserCount)
     self.assertEqual(memberCount, newMemberCount)
     self.assertEqual(models.get_anonymous_user().pk, anonUser.pk)
@@ -147,7 +147,7 @@ class MemberTest(TestCase):
     user = models.get_anonymous_user()
     user.member.delete()
     member = None
-    with self.assertRaises(models.Member.DoesNotExist):
+    with self.assertRaises(models.Identity.DoesNotExist):
       member = User.objects.get(id=user.pk).member
     user = models.get_anonymous_user()
     self.assertEqual(user.member.user_id, user.id)
@@ -222,8 +222,8 @@ class MemberAPITest(APITestMixin):
     response = self.postAPIRaw('/v1/member/self/has_permission/not.a_permission/')
     self.assertEqual(response.status_code, 403)
 
-  @withPermission('identity.add_member')
+  @withPermission('identity.add_identity')
   @withLogin
   def testHasPermission(self):
-    response = self.postAPIRaw('/v1/member/self/has_permission/identity.add_member/')
+    response = self.postAPIRaw('/v1/member/self/has_permission/identity.add_identity/')
     self.assertEqual(response.status_code, 204)

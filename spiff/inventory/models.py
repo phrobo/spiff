@@ -1,12 +1,12 @@
 from django.db import models
-from spiff.identity.models import Member
+from spiff.identity.models import Identity
 
 class Resource(models.Model):
   name = models.TextField()
   trainable = models.BooleanField(default=True)
-  users = models.ManyToManyField(Member, through='TrainingLevel',
+  users = models.ManyToManyField(Identity, through='TrainingLevel',
       limit_choices_to={'is_active': True})
-  certified_users = models.ManyToManyField(Member, through='Certification', related_name='certified_resources')
+  certified_users = models.ManyToManyField(Identity, through='Certification', related_name='certified_resources')
 
   def __unicode__(self):
     return self.name
@@ -37,7 +37,7 @@ class Metadata(models.Model):
     return self.value
 
 class TrainingLevel(models.Model):
-  member = models.ForeignKey(Member, related_name='trainings')
+  member = models.ForeignKey(Identity, related_name='trainings')
   resource = models.ForeignKey(Resource, related_name='trainings')
   rank = models.IntegerField()
 
@@ -52,7 +52,7 @@ class TrainingLevel(models.Model):
     return "%s: level %d %s user"%(self.member.fullName, self.rank, self.resource.name)
 
 class Certification(models.Model):
-  member = models.ForeignKey(Member, related_name='certifications')
+  member = models.ForeignKey(Identity, related_name='certifications')
   resource = models.ForeignKey(Resource, related_name='certifications')
   comment = models.TextField()
 
@@ -61,8 +61,8 @@ class Certification(models.Model):
 
 class Change(models.Model):
   resource = models.ForeignKey(Resource, related_name='changelog')
-  member = models.ForeignKey(Member, related_name='changes')
-  trained_member = models.ForeignKey(Member, related_name='training_changes',
+  member = models.ForeignKey(Identity, related_name='changes')
+  trained_member = models.ForeignKey(Identity, related_name='training_changes',
       null=True, blank=True)
   old = models.TextField(null=True, blank=True)
   new = models.TextField(null=True, blank=True)

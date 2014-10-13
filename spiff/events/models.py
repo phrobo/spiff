@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from spiff.identity.models import Member
+from spiff.identity.models import Identity
 from spiff.inventory.models import Resource
 
 class Event(models.Model):
@@ -20,8 +20,8 @@ class Event(models.Model):
   end = models.DateTimeField()
   name = models.TextField()
   description = models.TextField()
-  attendees = models.ManyToManyField(Member, related_name='events')
-  creator = models.ForeignKey(Member, related_name='owned_events')
+  attendees = models.ManyToManyField(Identity, related_name='events')
+  creator = models.ForeignKey(Identity, related_name='owned_events')
   organizers = models.ManyToManyField(User, related_name='organized_events')
   resources = models.ManyToManyField(Resource, related_name='events', blank=True)
 

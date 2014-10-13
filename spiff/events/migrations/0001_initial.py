@@ -15,7 +15,7 @@ class Migration(SchemaMigration):
             ('end', self.gf('django.db.models.fields.DateTimeField')()),
             ('name', self.gf('django.db.models.fields.TextField')()),
             ('description', self.gf('django.db.models.fields.TextField')()),
-            ('creator', self.gf('django.db.models.fields.related.ForeignKey')(related_name='owned_events', to=orm['identity.Member'])),
+            ('creator', self.gf('django.db.models.fields.related.ForeignKey')(related_name='owned_events', to=orm['identity.Identity'])),
         ))
         db.send_create_signal(u'events', ['Event'])
 
@@ -24,9 +24,9 @@ class Migration(SchemaMigration):
         db.create_table(m2m_table_name, (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
             ('event', models.ForeignKey(orm[u'events.event'], null=False)),
-            ('member', models.ForeignKey(orm[u'identity.member'], null=False))
+            ('identity', models.ForeignKey(orm[u'identity.identity'], null=False))
         ))
-        db.create_unique(m2m_table_name, ['event_id', 'member_id'])
+        db.create_unique(m2m_table_name, ['event_id', 'identity_id'])
 
         # Adding M2M table for field organizers on 'Event'
         m2m_table_name = db.shorten_name(u'events_event_organizers')
@@ -100,8 +100,8 @@ class Migration(SchemaMigration):
         },
         u'events.event': {
             'Meta': {'object_name': 'Event'},
-            'attendees': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'events'", 'symmetrical': 'False', 'to': u"orm['identity.Member']"}),
-            'creator': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'owned_events'", 'to': u"orm['identity.Member']"}),
+            'attendees': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'events'", 'symmetrical': 'False', 'to': u"orm['identity.Identity']"}),
+            'creator': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'owned_events'", 'to': u"orm['identity.Identity']"}),
             'description': ('django.db.models.fields.TextField', [], {}),
             'end': ('django.db.models.fields.DateTimeField', [], {}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -123,11 +123,11 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'FieldValue'},
             'field': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['identity.Field']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'member': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'attributes'", 'to': u"orm['identity.Member']"}),
+            'member': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'attributes'", 'to': u"orm['identity.Identity']"}),
             'value': ('django.db.models.fields.TextField', [], {})
         },
-        u'identity.member': {
-            'Meta': {'object_name': 'Member'},
+        u'identity.identity': {
+            'Meta': {'object_name': 'Identity'},
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'displayName': ('django.db.models.fields.TextField', [], {}),
             'fields': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['identity.Field']", 'through': u"orm['identity.FieldValue']", 'symmetrical': 'False'}),
@@ -141,21 +141,21 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'Certification'},
             'comment': ('django.db.models.fields.TextField', [], {}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'member': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'certifications'", 'to': u"orm['identity.Member']"}),
+            'member': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'certifications'", 'to': u"orm['identity.Identity']"}),
             'resource': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'certifications'", 'to': u"orm['inventory.Resource']"})
         },
         u'inventory.resource': {
             'Meta': {'object_name': 'Resource'},
-            'certified_users': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'certified_resources'", 'symmetrical': 'False', 'through': u"orm['inventory.Certification']", 'to': u"orm['identity.Member']"}),
+            'certified_users': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'certified_resources'", 'symmetrical': 'False', 'through': u"orm['inventory.Certification']", 'to': u"orm['identity.Identity']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.TextField', [], {}),
             'trainable': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'users': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['identity.Member']", 'through': u"orm['inventory.TrainingLevel']", 'symmetrical': 'False'})
+            'users': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['identity.Identity']", 'through': u"orm['inventory.TrainingLevel']", 'symmetrical': 'False'})
         },
         u'inventory.traininglevel': {
             'Meta': {'ordering': "['-rank']", 'object_name': 'TrainingLevel'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'member': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'trainings'", 'to': u"orm['identity.Member']"}),
+            'member': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'trainings'", 'to': u"orm['identity.Identity']"}),
             'rank': ('django.db.models.fields.IntegerField', [], {}),
             'resource': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'trainings'", 'to': u"orm['inventory.Resource']"})
         }

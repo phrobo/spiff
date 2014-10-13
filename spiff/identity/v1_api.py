@@ -212,7 +212,7 @@ class MemberResource(ModelResource):
   fields = fields.ToManyField('spiff.identity.v1_api.FieldValueResource', 'attributes', full=False, null=True)
 
   class Meta:
-    queryset = models.Member.objects.all()
+    queryset = models.Identity.objects.all()
     authorization = SelfMemberAuthorization()
     always_return_data = True
     filtering = {
@@ -298,7 +298,7 @@ class MemberResource(ModelResource):
     self.method_check(request, allowed=['post', 'get'])
     self.is_authenticated(request)
     self.throttle_check(request)
-    member = models.Member.objects.get(pk=kwargs['id'])
+    member = models.Identity.objects.get(pk=kwargs['id'])
 
     if request.method == 'POST':
       cardData = json.loads(request.body)
@@ -320,7 +320,7 @@ class MemberResource(ModelResource):
 
     cardID = kwargs['stripeCardID']
 
-    member = models.Member.objects.get(pk=kwargs['id'])
+    member = models.Identity.objects.get(pk=kwargs['id'])
     member.removeStripeCard(cardID)
 
     return self.create_response(request, {'success': True})

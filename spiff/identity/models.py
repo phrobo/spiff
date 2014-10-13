@@ -31,7 +31,7 @@ class UserResetToken(models.Model):
         string.digits) for _ in range(10))
     return super(UserResetToken, self).save(*args, **kwargs)
 
-class Member(models.Model):
+class Identity(models.Model):
   tagline = models.CharField(max_length=255)
   user = models.OneToOneField(User, related_name='member')
   created = models.DateTimeField(editable=False, auto_now_add=True)
@@ -139,7 +139,7 @@ class Field(models.Model):
 
 class FieldValue(models.Model):
   field = models.ForeignKey(Field)
-  member = models.ForeignKey(Member, related_name='attributes')
+  member = models.ForeignKey(Identity, related_name='attributes')
   value = models.TextField()
 
   def __unicode__(self):
@@ -147,7 +147,7 @@ class FieldValue(models.Model):
 
 class RankSubscriptionPlan(SubscriptionPlan):
     rank = models.ForeignKey(Rank, related_name='subscriptions')
-    member = models.ForeignKey(Member, related_name='rankSubscriptions',
+    member = models.ForeignKey(Identity, related_name='rankSubscriptions',
         blank=True, null=True)
     quantity = models.IntegerField(default=1)
 
@@ -183,7 +183,7 @@ class RankSubscriptionPlan(SubscriptionPlan):
 
 class RankLineItem(spiff.payment.models.LineItem):
     rank = models.ForeignKey(Rank)
-    member = models.ForeignKey(Member, related_name='rankLineItems')
+    member = models.ForeignKey(Identity, related_name='rankLineItems')
     activeFromDate = models.DateTimeField(default=datetime.datetime.utcnow())
     activeToDate = models.DateTimeField(default=datetime.datetime.utcnow())
 
@@ -209,7 +209,7 @@ class RankLineItem(spiff.payment.models.LineItem):
 
 class MembershipPeriod(models.Model):
     rank = models.ForeignKey(Rank)
-    member = models.ForeignKey(Member, related_name='membershipPeriods')
+    member = models.ForeignKey(Identity, related_name='membershipPeriods')
     activeFromDate = models.DateTimeField(default=datetime.datetime.utcnow())
     activeToDate = models.DateTimeField(default=datetime.datetime.utcnow())
     lineItem = models.ForeignKey(RankLineItem, default=None, null=True, blank=True)
@@ -271,7 +271,7 @@ class MembershipPeriod(models.Model):
 
 def create_member(sender, instance, created, **kwargs):
   if created:
-    Member.objects.get_or_create(user=instance)
+    Identity.objects.get_or_create(user=instance)
     OpenID.objects.get_or_create(user=instance, default=True)
 
 post_save.connect(create_member, sender=User)
@@ -354,7 +354,7 @@ def get_anonymous_user():
       )
       user.set_unusable_password()
       user.save()
-      member = Member.objects.get(
+      member = Identity.objects.get(
         user=user,
         displayName='Guest McGuesterson'
       )
@@ -364,8 +364,8 @@ def get_anonymous_user():
     user = User.objects.get(id=settings.ANONYMOUS_USER_ID)
   try:
     member = user.member
-  except Member.DoesNotExist:
-    user.member, created = Member.objects.get_or_create(user=user)
+  except Identity.DoesNotExist:
+    user.member, created = Identity.objects.get_or_create(user=user)
     user.save()
   return user
 
