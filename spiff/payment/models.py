@@ -8,6 +8,56 @@ from spiff import funcLog
 from spiff.notification_loader import notification
 notification = None
 from spiff.api.plugins import find_api_classes
+from django.conf import settings
+
+if not hasattr(settings, 'STRIPE_KEY'):
+  settings.STRIPE_KEY = None
+
+stripe.api_key = settings.STRIPE_KEY
+
+class StripeProxy(models.Model):
+  user = models.ForeignKey(User, related_name='stripe')
+  stripeID = models.TextField()
+
+  @property
+  def customer(self):
+    try:
+      customer = stripe.Customer.retrieve(self.stripeID)
+    except stripe.InvalidRequestError:
+      customer = stripe.Customer.create(
+        description = self.fullName,
+        email = self.user.email
+      )
+      self.stripeID = customer.id
+      self.save()
+      return self.stripeCustomer()
+    if customer.get('deleted') == True:
+      self.stripeID = ""
+      self.save()
+      return self.stripeCustomer()
+    return customer
+
+  @property
+  def stripeCards(self):
+    customer = self.stripeCustomer()
+    if customer.get('cards'):
+      return customer.cards.data
+    return []
+
+  def addStripeCard(self, cardData):
+    customer = self.stripeCustomer()
+    return customer.cards.create(
+      card = cardData
+    )
+
+  def setDefaultStripeCard(self, cardID):
+    customer = self.stripeCustomer()
+    customer.default_card = cardID
+    customer.save()
+
+  def removeStripeCard(self, cardID):
+    customer = self.stripeCustomer()
+    customer.cards.retrieve(cardID).delete()
 
 class InvoiceManager(models.Manager):
 

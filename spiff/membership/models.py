@@ -7,15 +7,12 @@ from south.signals import post_migrate
 from openid_provider.models import OpenID
 from spiff.membership.utils import monthRange
 import datetime
-import stripe
 from django.conf import settings
 import spiff.payment.models
 from spiff.subscription.models import SubscriptionPlan
 from spiff import funcLog
 from django.core.exceptions import ValidationError
 from django.db.models import Q
-
-stripe.api_key = settings.STRIPE_KEY
 
 if not hasattr(settings, 'ANONYMOUS_USER_ID'):
   settings.ANONYMOUS_USER_ID = 0
@@ -40,35 +37,12 @@ class Member(models.Model):
   created = models.DateTimeField(editable=False, auto_now_add=True)
   lastSeen = models.DateTimeField(editable=False, auto_now_add=True)
   fields = models.ManyToManyField('Field', through='FieldValue')
-  stripeID = models.TextField()
   hidden = models.BooleanField(default=False)
   displayName = models.TextField()
 
   @property
   def availableCredit(self):
     return spiff.payment.models.Credit.objects.userTotal(self)
-
-  @property
-  def stripeCards(self):
-    customer = self.stripeCustomer()
-    if customer.get('cards'):
-      return customer.cards.data
-    return []
-
-  def addStripeCard(self, cardData):
-    customer = self.stripeCustomer()
-    return customer.cards.create(
-      card = cardData
-    )
-
-  def setDefaultStripeCard(self, cardID):
-    customer = self.stripeCustomer()
-    customer.default_card = cardID
-    customer.save()
-
-  def removeStripeCard(self, cardID):
-    customer = self.stripeCustomer()
-    customer.cards.retrieve(cardID).delete()
 
   def isAnonymous(self):
     return self.user_id == get_anonymous_user().id
@@ -78,23 +52,6 @@ class Member(models.Model):
       ('can_view_hidden_members', 'Can view hidden members'),
       ('list_members', 'Can list members'),
     )
-
-  def stripeCustomer(self):
-    try:
-      customer = stripe.Customer.retrieve(self.stripeID)
-    except stripe.InvalidRequestError:
-      customer = stripe.Customer.create(
-        description = self.fullName,
-        email = self.user.email
-      )
-      self.stripeID = customer.id
-      self.save()
-      return self.stripeCustomer()
-    if customer.get('deleted') == True:
-      self.stripeID = ""
-      self.save()
-      return self.stripeCustomer()
-    return customer
 
   @property
   def fullName(self):
