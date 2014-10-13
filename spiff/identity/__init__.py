@@ -1,5 +1,5 @@
 import spiff.api.plugins
-from spiff.membership.models import Rank
+from spiff.identity.models import Rank
 import spiff.local
 
 class App(spiff.api.plugins.SpiffApp):

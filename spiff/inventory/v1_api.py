@@ -4,7 +4,7 @@ from tastypie.resources import ModelResource
 import models
 
 class TrainingResource(ModelResource):
-  member = fields.ToOneField('spiff.membership.v1_api.MemberResource', 'member', full=True)
+  member = fields.ToOneField('spiff.identity.v1_api.MemberResource', 'member', full=True)
   resource = fields.ToOneField('spiff.inventory.v1_api.ResourceResource', 'resource')
   rank = fields.CharField('comment', blank=True)
 
@@ -62,7 +62,7 @@ class ResourceMetadataResource(ModelResource):
     return bundle
 
 class ChangelogResource(ModelResource):
-  member = fields.ToOneField('spiff.membership.v1_api.MemberResource', 'member', full=True)
+  member = fields.ToOneField('spiff.identity.v1_api.MemberResource', 'member', full=True)
   old = fields.CharField('old', null=True)
   new = fields.CharField('new', null=True)
   property = fields.CharField('property', null=True)

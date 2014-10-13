@@ -5,7 +5,7 @@ from django.contrib.auth.models import User, Group
 from django.db.models.signals import post_save, post_syncdb
 from south.signals import post_migrate
 from openid_provider.models import OpenID
-from spiff.membership.utils import monthRange
+from spiff.identity.utils import monthRange
 import datetime
 from django.conf import settings
 import spiff.payment.models
@@ -241,8 +241,8 @@ class MembershipPeriod(models.Model):
       cursor = connection.cursor()
       cursor.execute("\
         SELECT MIN(a.activeFromDate), MAX(b.activeToDate) \
-        FROM membership_membershipperiod AS a \
-        LEFT JOIN membership_membershipperiod AS b \
+        FROM identity_membershipperiod AS a \
+        LEFT JOIN identity_membershipperiod AS b \
         ON \
           ( a.activeToDate >= b.activeFromDate OR \
           a.activeFromDate <= b.activeToDate) AND \
@@ -351,11 +351,13 @@ def get_anonymous_user():
         username='anonymous',
         email='anonymous@example.com',
         password='',
-        displayName='Guest McGuesterson',
       )
       user.set_unusable_password()
       user.save()
-      member = Member.objects.get(user=user)
+      member = Member.objects.get(
+        user=user,
+        displayName='Guest McGuesterson'
+      )
       member.hidden = True
       member.save()
   else:

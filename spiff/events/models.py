@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from spiff.membership.models import Member
+from spiff.identity.models import Member
 from spiff.inventory.models import Resource
 
 class Event(models.Model):

@@ -1,5 +1,5 @@
 from django.db import models
-from spiff.membership.models import Member
+from spiff.identity.models import Member
 
 class Resource(models.Model):
   name = models.TextField()

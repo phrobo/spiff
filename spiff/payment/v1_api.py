@@ -10,7 +10,7 @@ from spiff.api import SpiffAuthorization, OwnedObjectAuthorization
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
 
 class CreditResource(ModelResource):
-  user = fields.ToOneField('spiff.membership.v1_api.UserResource', 'user')
+  user = fields.ToOneField('spiff.identity.v1_api.UserResource', 'user')
   value = fields.FloatField('value')
   description = fields.CharField('description')
   created = fields.DateTimeField('created')
@@ -29,7 +29,7 @@ class CreditResource(ModelResource):
 class PaymentResource(ModelResource):
   invoice = fields.ToOneField('spiff.payment.v1_api.InvoiceResource', 'invoice')
   value = fields.FloatField('value')
-  user = fields.ToOneField('spiff.membership.v1_api.UserResource', 'user')
+  user = fields.ToOneField('spiff.identity.v1_api.UserResource', 'user')
   method = fields.IntegerField('method')
 
   class Meta:
@@ -103,7 +103,7 @@ class LineItemResource(ModelResource):
     always_return_data = True
 
 class InvoiceResource(ModelResource):
-  user = fields.ToOneField('spiff.membership.v1_api.UserResource', attribute='user',
+  user = fields.ToOneField('spiff.identity.v1_api.UserResource', attribute='user',
       null=True, full=False)
   unpaidBalance = fields.FloatField('unpaidBalance', readonly=True)
   paidBalance = fields.FloatField('paidBalance', readonly=True)

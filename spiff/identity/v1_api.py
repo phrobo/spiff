@@ -56,7 +56,7 @@ class FieldResource(ModelResource):
 class FieldValueResource(ModelResource):
   field = fields.ToOneField(FieldResource, 'field', full=True)
   value = fields.CharField('value')
-  member = fields.ToOneField('spiff.membership.v1_api.MemberResource',
+  member = fields.ToOneField('spiff.identity.v1_api.MemberResource',
   'member')
 
   class Meta:
@@ -83,7 +83,7 @@ class RankSubscriptionPlanResource(subscription.SubscriptionPlanResource):
     always_return_data = True
 
 class RankResource(ModelResource):
-  group = fields.ToOneField('spiff.membership.v1_api.GroupResource', 'group')
+  group = fields.ToOneField('spiff.identity.v1_api.GroupResource', 'group')
   monthlyDues = fields.FloatField('monthlyDues')
   isActiveMembership = fields.BooleanField('isActiveMembership')
 
@@ -171,11 +171,11 @@ class UserResource(ModelResource):
 
 class MembershipPeriodResource(ModelResource):
   rank = fields.ToOneField(RankResource, 'rank', full=True)
-  member = fields.ToOneField('spiff.membership.v1_api.MemberResource',
+  member = fields.ToOneField('spiff.identity.v1_api.MemberResource',
   'member')
   activeFromDate = fields.DateTimeField('activeFromDate')
   activeToDate = fields.DateTimeField('activeToDate')
-  contiguousPeriods = fields.ToManyField('spiff.membership.v1_api.MembershipPeriodResource', 'contiguousPeriods', null=True)
+  contiguousPeriods = fields.ToManyField('spiff.identity.v1_api.MembershipPeriodResource', 'contiguousPeriods', null=True)
   contiguousDates = fields.ListField('contiguousDates', null=True)
 
   class Meta:
@@ -209,7 +209,7 @@ class MemberResource(ModelResource):
   userid = fields.IntegerField('user_id', readonly=True)
   membershipRanges = fields.ListField('membershipRanges', null=True)
   availableCredit = fields.FloatField('availableCredit')
-  fields = fields.ToManyField('spiff.membership.v1_api.FieldValueResource', 'attributes', full=False, null=True)
+  fields = fields.ToManyField('spiff.identity.v1_api.FieldValueResource', 'attributes', full=False, null=True)
 
   class Meta:
     queryset = models.Member.objects.all()

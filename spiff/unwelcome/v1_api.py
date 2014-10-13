@@ -8,7 +8,7 @@ class UnwelcomePersonResource(ModelResource):
   name = fields.CharField('name')
   reason = fields.CharField('reason')
   timestamp = fields.DateTimeField('timestamp', blank=True, default=None)
-  creator = fields.ToOneField('spiff.membership.v1_api.MemberResource',
+  creator = fields.ToOneField('spiff.identity.v1_api.MemberResource',
       'creator')
 
   class Meta:

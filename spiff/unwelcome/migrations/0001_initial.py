@@ -13,7 +13,7 @@ class Migration(SchemaMigration):
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('name', self.gf('django.db.models.fields.TextField')()),
             ('reason', self.gf('django.db.models.fields.TextField')()),
-            ('creator', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['membership.Member'])),
+            ('creator', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['identity.Member'])),
             ('timestamp', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
         ))
         db.send_create_signal(u'unwelcome', ['UnwelcomePerson'])
@@ -21,7 +21,7 @@ class Migration(SchemaMigration):
         # Adding model 'Voucher'
         db.create_table(u'unwelcome_voucher', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('member', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['membership.Member'])),
+            ('member', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['identity.Member'])),
             ('unwelsomePerson', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['unwelcome.UnwelcomePerson'])),
             ('timestamp', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
         ))
@@ -73,7 +73,7 @@ class Migration(SchemaMigration):
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
-        u'membership.field': {
+        u'identity.field': {
             'Meta': {'object_name': 'Field'},
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -82,28 +82,27 @@ class Migration(SchemaMigration):
             'public': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'required': ('django.db.models.fields.BooleanField', [], {'default': 'False'})
         },
-        u'membership.fieldvalue': {
+        u'identity.fieldvalue': {
             'Meta': {'object_name': 'FieldValue'},
-            'field': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['membership.Field']"}),
+            'field': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['identity.Field']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'member': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'attributes'", 'to': u"orm['membership.Member']"}),
+            'member': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'attributes'", 'to': u"orm['identity.Member']"}),
             'value': ('django.db.models.fields.TextField', [], {})
         },
-        u'membership.member': {
+        u'identity.member': {
             'Meta': {'object_name': 'Member'},
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'displayName': ('django.db.models.fields.TextField', [], {}),
-            'fields': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['membership.Field']", 'through': u"orm['membership.FieldValue']", 'symmetrical': 'False'}),
+            'fields': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['identity.Field']", 'through': u"orm['identity.FieldValue']", 'symmetrical': 'False'}),
             'hidden': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'lastSeen': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'stripeID': ('django.db.models.fields.TextField', [], {}),
             'tagline': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'user': ('django.db.models.fields.related.OneToOneField', [], {'related_name': "'member'", 'unique': 'True', 'to': u"orm['auth.User']"})
         },
         u'unwelcome.unwelcomeperson': {
             'Meta': {'object_name': 'UnwelcomePerson'},
-            'creator': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['membership.Member']"}),
+            'creator': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['identity.Member']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.TextField', [], {}),
             'reason': ('django.db.models.fields.TextField', [], {}),
@@ -112,7 +111,7 @@ class Migration(SchemaMigration):
         u'unwelcome.voucher': {
             'Meta': {'object_name': 'Voucher'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'member': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['membership.Member']"}),
+            'member': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['identity.Member']"}),
             'timestamp': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'unwelsomePerson': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['unwelcome.UnwelcomePerson']"})
         }

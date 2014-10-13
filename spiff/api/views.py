@@ -3,7 +3,7 @@ from django.contrib.sites.models import get_current_site
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from spiff.local.models import SpaceConfig, SpaceContact, SpaceFeed
-from spiff.membership.models import Rank
+from spiff.identity.models import Rank
 from spiff.api.plugins import find_apps
 import json
 import random

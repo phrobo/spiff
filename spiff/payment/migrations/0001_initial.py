@@ -8,6 +8,14 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
+        # Adding model 'StripeProxy'
+        db.create_table(u'payment_stripeproxy', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('user', self.gf('django.db.models.fields.related.ForeignKey')(related_name='stripe', to=orm['auth.User'])),
+            ('stripeID', self.gf('django.db.models.fields.TextField')()),
+        ))
+        db.send_create_signal(u'payment', ['StripeProxy'])
+
         # Adding model 'Invoice'
         db.create_table(u'payment_invoice', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
@@ -65,6 +73,9 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
+        # Deleting model 'StripeProxy'
+        db.delete_table(u'payment_stripeproxy')
+
         # Deleting model 'Invoice'
         db.delete_table(u'payment_invoice')
 
@@ -162,6 +173,12 @@ class Migration(SchemaMigration):
             'transactionID': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'payments'", 'to': u"orm['auth.User']"}),
             'value': ('django.db.models.fields.FloatField', [], {})
+        },
+        u'payment.stripeproxy': {
+            'Meta': {'object_name': 'StripeProxy'},
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'stripeID': ('django.db.models.fields.TextField', [], {}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'stripe'", 'to': u"orm['auth.User']"})
         }
     }
 

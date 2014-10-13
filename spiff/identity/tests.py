@@ -55,10 +55,10 @@ class MembershipPeriodTest(APITestMixin):
         datetime.date.today())
     self.assertEqual(membershipPeriod.activeToDate.date(), datetime.date.today())
 
-  @withPermission('membership.read_member')
+  @withPermission('identity.read_member')
   @withPermission('auth.read_group')
-  @withPermission('membership.create_membershipperiod')
-  @withPermission('membership.read_rank')
+  @withPermission('identity.create_membershipperiod')
+  @withPermission('identity.read_rank')
   @withPermission('payment.create_invoice')
   @withPermission('payment.create_payment')
   @withPermission('subscription.read_subscriptionplan')
@@ -187,13 +187,12 @@ class MemberSearchAPITest(APITestMixin):
   @withUser
   def testSearchPartialMultiple(self):
     guesterson = self.createUser('guest', 'guest')
-    guesterson.first_name = 'Guest'
-    guesterson.last_name = 'McGuesterson'
+    guesterson.member.displayName = 'Guest McGuesterson'
     guesterson.save()
 
     ret = self.search(fullName='esterson')
     self.assertIn('objects', ret)
-    self.assertEqual(len(ret['objects']), 3)
+    self.assertEqual(len(ret['objects']), 2)
 
 class MemberAPITest(APITestMixin):
   def setUp(self):
@@ -223,8 +222,8 @@ class MemberAPITest(APITestMixin):
     response = self.postAPIRaw('/v1/member/self/has_permission/not.a_permission/')
     self.assertEqual(response.status_code, 403)
 
-  @withPermission('membership.add_member')
+  @withPermission('identity.add_member')
   @withLogin
   def testHasPermission(self):
-    response = self.postAPIRaw('/v1/member/self/has_permission/membership.add_member/')
+    response = self.postAPIRaw('/v1/member/self/has_permission/identity.add_member/')
     self.assertEqual(response.status_code, 204)

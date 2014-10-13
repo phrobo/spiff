@@ -100,10 +100,10 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'spiff.membership.middleware.JWTAuthMiddleware',
+    'spiff.identity.middleware.JWTAuthMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'spiff.membership.middleware.AnonymousUserMiddleware',
+    'spiff.identity.middleware.AnonymousUserMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -138,7 +138,7 @@ INSTALLED_APPS = (
     'spiff.api',
     'spiff.subscription',
     'spiff.donations',
-    'spiff.membership',
+    'spiff.identity',
     'spiff.inventory',
     'spiff.local',
     'spiff.events',
@@ -217,8 +217,8 @@ GREETINGS = (
 WELCOME_MESSAGE = """
 Spiff is a tool for managing hackerspaces. It provides nice things like:
 
-  * Member registration
-  * Donation and membership subscriptions
+  * Identity registration
+  * One-time and recurring donations
   * Tracking inventory and other resources
   * Flexibility for your space
 

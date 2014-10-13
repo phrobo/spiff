@@ -29,7 +29,7 @@ class Migration(SchemaMigration):
         # Adding model 'TrainingLevel'
         db.create_table(u'inventory_traininglevel', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('member', self.gf('django.db.models.fields.related.ForeignKey')(related_name='trainings', to=orm['membership.Member'])),
+            ('member', self.gf('django.db.models.fields.related.ForeignKey')(related_name='trainings', to=orm['identity.Member'])),
             ('resource', self.gf('django.db.models.fields.related.ForeignKey')(related_name='trainings', to=orm['inventory.Resource'])),
             ('rank', self.gf('django.db.models.fields.IntegerField')()),
         ))
@@ -38,7 +38,7 @@ class Migration(SchemaMigration):
         # Adding model 'Certification'
         db.create_table(u'inventory_certification', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('member', self.gf('django.db.models.fields.related.ForeignKey')(related_name='certifications', to=orm['membership.Member'])),
+            ('member', self.gf('django.db.models.fields.related.ForeignKey')(related_name='certifications', to=orm['identity.Member'])),
             ('resource', self.gf('django.db.models.fields.related.ForeignKey')(related_name='certifications', to=orm['inventory.Resource'])),
             ('comment', self.gf('django.db.models.fields.TextField')()),
         ))
@@ -48,8 +48,8 @@ class Migration(SchemaMigration):
         db.create_table(u'inventory_change', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('resource', self.gf('django.db.models.fields.related.ForeignKey')(related_name='changelog', to=orm['inventory.Resource'])),
-            ('member', self.gf('django.db.models.fields.related.ForeignKey')(related_name='changes', to=orm['membership.Member'])),
-            ('trained_member', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='training_changes', null=True, to=orm['membership.Member'])),
+            ('member', self.gf('django.db.models.fields.related.ForeignKey')(related_name='changes', to=orm['identity.Member'])),
+            ('trained_member', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='training_changes', null=True, to=orm['identity.Member'])),
             ('old', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
             ('new', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
             ('property', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
@@ -112,23 +112,50 @@ class Migration(SchemaMigration):
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
+        u'identity.field': {
+            'Meta': {'object_name': 'Field'},
+            'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
+            'protected': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'public': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'required': ('django.db.models.fields.BooleanField', [], {'default': 'False'})
+        },
+        u'identity.fieldvalue': {
+            'Meta': {'object_name': 'FieldValue'},
+            'field': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['identity.Field']"}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'member': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'attributes'", 'to': u"orm['identity.Member']"}),
+            'value': ('django.db.models.fields.TextField', [], {})
+        },
+        u'identity.member': {
+            'Meta': {'object_name': 'Member'},
+            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'displayName': ('django.db.models.fields.TextField', [], {}),
+            'fields': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['identity.Field']", 'through': u"orm['identity.FieldValue']", 'symmetrical': 'False'}),
+            'hidden': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'lastSeen': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'tagline': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'user': ('django.db.models.fields.related.OneToOneField', [], {'related_name': "'member'", 'unique': 'True', 'to': u"orm['auth.User']"})
+        },
         u'inventory.certification': {
             'Meta': {'object_name': 'Certification'},
             'comment': ('django.db.models.fields.TextField', [], {}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'member': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'certifications'", 'to': u"orm['membership.Member']"}),
+            'member': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'certifications'", 'to': u"orm['identity.Member']"}),
             'resource': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'certifications'", 'to': u"orm['inventory.Resource']"})
         },
         u'inventory.change': {
             'Meta': {'ordering': "['-stamp']", 'object_name': 'Change'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'member': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'changes'", 'to': u"orm['membership.Member']"}),
+            'member': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'changes'", 'to': u"orm['identity.Member']"}),
             'new': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'old': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'property': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'resource': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'changelog'", 'to': u"orm['inventory.Resource']"}),
             'stamp': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'trained_member': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'training_changes'", 'null': 'True', 'to': u"orm['membership.Member']"})
+            'trained_member': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'training_changes'", 'null': 'True', 'to': u"orm['identity.Member']"})
         },
         u'inventory.metadata': {
             'Meta': {'object_name': 'Metadata'},
@@ -140,45 +167,18 @@ class Migration(SchemaMigration):
         },
         u'inventory.resource': {
             'Meta': {'object_name': 'Resource'},
-            'certified_users': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'certified_resources'", 'symmetrical': 'False', 'through': u"orm['inventory.Certification']", 'to': u"orm['membership.Member']"}),
+            'certified_users': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'certified_resources'", 'symmetrical': 'False', 'through': u"orm['inventory.Certification']", 'to': u"orm['identity.Member']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.TextField', [], {}),
             'trainable': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'users': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['membership.Member']", 'through': u"orm['inventory.TrainingLevel']", 'symmetrical': 'False'})
+            'users': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['identity.Member']", 'through': u"orm['inventory.TrainingLevel']", 'symmetrical': 'False'})
         },
         u'inventory.traininglevel': {
             'Meta': {'ordering': "['-rank']", 'object_name': 'TrainingLevel'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'member': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'trainings'", 'to': u"orm['membership.Member']"}),
+            'member': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'trainings'", 'to': u"orm['identity.Member']"}),
             'rank': ('django.db.models.fields.IntegerField', [], {}),
             'resource': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'trainings'", 'to': u"orm['inventory.Resource']"})
-        },
-        u'membership.field': {
-            'Meta': {'object_name': 'Field'},
-            'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'protected': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'public': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'required': ('django.db.models.fields.BooleanField', [], {'default': 'False'})
-        },
-        u'membership.fieldvalue': {
-            'Meta': {'object_name': 'FieldValue'},
-            'field': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['membership.Field']"}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'member': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'attributes'", 'to': u"orm['membership.Member']"}),
-            'value': ('django.db.models.fields.TextField', [], {})
-        },
-        u'membership.member': {
-            'Meta': {'object_name': 'Member'},
-            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'fields': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['membership.Field']", 'through': u"orm['membership.FieldValue']", 'symmetrical': 'False'}),
-            'hidden': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'lastSeen': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'stripeID': ('django.db.models.fields.TextField', [], {}),
-            'tagline': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'user': ('django.db.models.fields.related.OneToOneField', [], {'related_name': "'member'", 'unique': 'True', 'to': u"orm['auth.User']"})
         }
     }
 

@@ -34,7 +34,7 @@ class SubscriptionPlanResource(ModelResource):
     }
 
 class SubscriptionResource(ModelResource):
-  user = fields.ToOneField('spiff.membership.v1_api.UserResource',
+  user = fields.ToOneField('spiff.identity.v1_api.UserResource',
       'user', null=True)
   active = fields.BooleanField('active')
   plan = fields.ToOneField('spiff.subscription.v1_api.SubscriptionPlanResource',
