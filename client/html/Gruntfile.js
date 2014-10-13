@@ -32,7 +32,7 @@ module.exports = function(grunt) {
       app: {
         files: {
           'app/lib/app.js': [
-            'app/js/**/*.js'
+            'js/**/*.js'
           ]
         }
       }
@@ -61,7 +61,7 @@ module.exports = function(grunt) {
         tasks: ['bower', 'uglify:deps']
       },
       scripts: {
-        files: ['app/js/**/*.js', 'app/js/*.js'],
+        files: ['js/**/*.js', 'js/*.js'],
         tasks: ['uglify:app'],
       }
     }
