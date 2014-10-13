@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.test.client import Client
-from spiff import membership, sensors, local, funcLog
+from spiff import identity, local, funcLog
+from django.contrib.sites.models import Site
 from django.contrib.auth.models import User, Permission, Group
 import json
 import functools
@@ -57,11 +58,22 @@ def withLogin(func):
 class ClientTestMixin(TestCase):
   def setupClient(self):
     self.client = Client()
+    self.site = Site.objects.create(domain='example.com', name='Example')
 
-class APITestMixin(ClientTestMixin):
-  def setupAPI(self):
-    self.user = membership.models.get_anonymous_user()
+class SpaceAPITestMixin(ClientTestMixin):
+  def setupSpaceAPI(self):
     self.setupClient()
+
+  def getSpaceAPI(self):
+    response = self.client.get('/status.json')
+    self.assertEqual(response.status_code, 200)
+    return json.loads(response.content)
+
+
+class APITestMixin(SpaceAPITestMixin):
+  def setupAPI(self):
+    self.user = identity.models.get_anonymous_user()
+    self.setupSpaceAPI()
 
   def revokePermission(self, permissionName):
     funcLog().info("Revoking %s from %s", permissionName, self.user)
@@ -88,9 +100,9 @@ class APITestMixin(ClientTestMixin):
   def createUser(self, username, password):
     funcLog().info("Creating user %s with password %s", username, password)
     user = User.objects.create_user(username, 'test@example.com', password)
-    user.first_name = 'Test'
-    user.last_name = 'McTesterson'
     user.save()
+    user.member.displayName = 'Test McTesterson'
+    user.member.save()
     return user
 
   def createGroup(self, name):
@@ -178,41 +190,14 @@ class APITestMixin(ClientTestMixin):
     ret = json.loads(ret.content)
     return ret
 
-class SpaceAPITest(ClientTestMixin):
+class SpaceAPITest(SpaceAPITestMixin):
   def setUp(self):
     self.setupClient()
-
-  def getAPI(self):
-    response = self.client.get('/status.json')
-    self.assertEqual(response.status_code, 200)
-    return json.loads(response.content)
 
   def testAPIStatus(self):
     response = self.client.get('/status.json')
     self.assertEqual(response.status_code, 200)
 
   def testMissingDoorSensorSensor(self):
-    data = self.getAPI()
-    self.assertFalse(data['open'])
-
-  def testDoorSensor(self):
-    conf = local.models.SpaceConfig.objects.all()[0]
-    sensor = sensors.models.Sensor.objects.create(
-      name='door',
-      description='Door Test Sensor',
-      type=sensors.models.SENSOR_TYPE_BOOLEAN,
-    )
-    conf.openSensor = sensor
-    conf.save()
-    sensors.models.SensorValue.objects.create(
-      sensor=sensor,
-      value="true"
-    )
-    data = self.getAPI()
-    self.assertTrue(data['open'])
-    sensors.models.SensorValue.objects.create(
-      sensor=sensor,
-      value="false"
-    )
-    data = self.getAPI()
+    data = self.getSpaceAPI()
     self.assertFalse(data['open'])
