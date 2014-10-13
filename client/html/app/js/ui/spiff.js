@@ -6,7 +6,7 @@ var Spiff = angular.module('spiff', [
 Spiff.directive('checkPermission', function(Spiff, $rootScope) {
   return {
     link: function(scope, element, attrs) {
-      scope.$watch('Spiff.currentUser', function(user) {
+      Spiff.$watch('currentUser', function(user) {
         if (attrs.checkPermission != undefined) {
           Spiff.checkPermission(scope.$eval(attrs.checkPermission)).then(function (result) {
             scope.hasPermission = result;
@@ -16,6 +16,25 @@ Spiff.directive('checkPermission', function(Spiff, $rootScope) {
         }
       });
     },
+  };
+});
+
+Spiff.directive('requireApp', function(Spiff, $rootScope) {
+  return {
+    link: function(scope, element, attrs) {
+      Spiff.$watch('apps', function(apps) {
+        if (attrs.requireApp != undefined) {
+          var found = false;
+          apps.forEach(function(app) {
+            if (app.id == scope.$eval(attrs.requireApp))
+              found = true;
+          });
+          scope.hasApp = found;
+        } else {
+          scope.hasApp = false;
+        }
+      });
+    }
   };
 });
 
@@ -127,7 +146,7 @@ Spiff.provider('Spiff', function() {
     });
 
     scope.apps = [];
-    SpiffRestangular.all('apps').getList().then(function(apps) {
+    SpiffRestangular.all('app').getList().then(function(apps) {
       scope.apps = apps;
     });
 

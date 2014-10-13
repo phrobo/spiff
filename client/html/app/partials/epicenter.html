@@ -3,17 +3,17 @@
     <a class="brand" ui-sref='dashboard'>{{spaceAPI.space}}</a>
     <ul class="nav">
       <li><a ui-sref="dashboard" >Home</a></li>
-      <li check-permission="'inventory.read_resource'">
-        <a ng-if="hasPermission" ui-sref="listResources">Resources</a>
+      <li require-app="'spiff.inventory'" check-permission="'inventory.read_resource'">
+        <a ng-if="hasPermission && hasApp" ui-sref="listResources">Resources</a>
       </li>
       <li check-permission="'membership.read_member'">
         <a ng-if="hasPermission" ui-sref="listMembers">Members</a>
       </li>
-      <li check-permission="'sensors.read_sensor'">
-        <a ng-if="hasPermission" ui-sref="listSensors">Sensors</a>
+      <li require-app="'spiff.sensors'" check-permission="'sensors.read_sensor'">
+        <a ng-if="hasPermission && hasApp" ui-sref="listSensors">Sensors</a>
       </li>
-      <li>
-        <a ui-sref="donate">Donate</a>
+      <li require-app="'spiff.donations'">
+        <a ng-if="hasApp" ui-sref="donate">Donate</a>
       </li>
     </ul>
     <ul class="nav pull-right" id="epicenter">
