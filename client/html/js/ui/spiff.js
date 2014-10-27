@@ -3,25 +3,27 @@ var Spiff = angular.module('spiff', [
   'spaceapi'
 ]);
 
-Spiff.directive('checkPermission', function(Spiff, $rootScope) {
+Spiff.directive('checkPermission', function(Spiff) {
   return {
     link: function(scope, element, attrs) {
+      return;
+      $(element).detachTemp();
       Spiff.$watch('currentUser', function(user) {
         if (attrs.checkPermission != undefined) {
           Spiff.checkPermission(scope.$eval(attrs.checkPermission)).then(function (result) {
-            scope.hasPermission = result;
+            if (result)
+              $(element).reattach();
           });
-        } else {
-          scope.hasPermission = false;
         }
       });
     },
   };
 });
 
-Spiff.directive('requireApp', function(Spiff, $rootScope) {
+Spiff.directive('requireApp', function(Spiff) {
   return {
     link: function(scope, element, attrs) {
+      $(element).detachTemp();
       Spiff.$watch('apps', function(apps) {
         if (attrs.requireApp != undefined) {
           var found = false;
@@ -29,9 +31,8 @@ Spiff.directive('requireApp', function(Spiff, $rootScope) {
             if (app.id == scope.$eval(attrs.requireApp))
               found = true;
           });
-          scope.hasApp = found;
-        } else {
-          scope.hasApp = false;
+          if (found)
+            $(element).reattach();
         }
       });
     }
@@ -67,22 +68,22 @@ Spiff.factory('SpiffRestangular', function(SpiffConfig, Restangular) {
       return true;
     });
 
-    RestangularConfigurer.addElementTransformer('member', true, function(member) {
-      if (member.addRestangularMethod) {
-        member.addRestangularMethod('login', 'post', 'login');
-        member.addRestangularMethod('search', 'get', 'search');
-        member.addRestangularMethod('requestPasswordReset', 'post', 'requestPasswordReset');
+    RestangularConfigurer.addElementTransformer('identity', true, function(identity) {
+      if (identity.addRestangularMethod) {
+        identity.addRestangularMethod('login', 'post', 'login');
+        identity.addRestangularMethod('search', 'get', 'search');
+        identity.addRestangularMethod('requestPasswordReset', 'post', 'requestPasswordReset');
       }
-      return member;
+      return identity;
     });
 
-    RestangularConfigurer.addElementTransformer('member', false, function(member) {
-      if (member.addRestangularMethod) {
-        member.addRestangularMethod('getStripeCards', 'get', 'stripeCards');
-        member.addRestangularMethod('addStripeCard', 'post', 'stripeCards');
-        member.addRestangularMethod('removeStripeCard', 'remove', 'stripeCards');
+    RestangularConfigurer.addElementTransformer('identity', false, function(identity) {
+      if (identity.addRestangularMethod) {
+        identity.addRestangularMethod('getStripeCards', 'get', 'stripeCards');
+        identity.addRestangularMethod('addStripeCard', 'post', 'stripeCards');
+        identity.addRestangularMethod('removeStripeCard', 'remove', 'stripeCards');
       }
-      return member;
+      return identity;
     });
 
     RestangularConfigurer.setResponseExtractor(function(response, operation, what, url) {
@@ -163,7 +164,7 @@ Spiff.provider('Spiff', function() {
     };
 
     scope.refreshUser = function() {
-      return SpiffRestangular.one('member', 'self').get().then(function(user) {
+      return SpiffRestangular.one('identity', 'self').get().then(function(user) {
         scope.currentUser = user;
       });
     };
@@ -187,7 +188,7 @@ Spiff.provider('Spiff', function() {
       if (password === undefined) {
         return scope.refreshUser();
       } else {
-        return SpiffRestangular.all('member').login({
+        return SpiffRestangular.all('identity').login({
           username: username,
           password: password
         }).then(function(data) {
@@ -213,10 +214,10 @@ Spiff.provider('Spiff', function() {
     scope.currentUser = null;
 
     scope.checkPermission = function(perm) {
-      var member = SpiffRestangular.one('member', 'self');
+      var identity = SpiffRestangular.one('identity', 'self');
       var ret = $q.defer();
       var authHeader = 'Bearer '+SpiffConfig.getAuthToken();
-      $http.get(member.getRestangularUrl()+'/has_permission/'+perm+'/', {'headers': {'Authorization': authHeader}}).success(function() {
+      $http.get(identity.getRestangularUrl()+'/has_permission/'+perm+'/', {'headers': {'Authorization': authHeader}}).success(function() {
         ret.resolve(true);
       }).error(function() {
         ret.resolve(false);
