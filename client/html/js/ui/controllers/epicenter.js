@@ -8,7 +8,7 @@ angular.module('spiff.epicenter', [
   $scope.d = {};
 
   $scope.requestReset = function() {
-    SpiffRestangular.one('member', Spiff.currentUser.id).patch({'currentPassword': $scope.d.current, 'password': $scope.d.new});
+    SpiffRestangular.one('identity', Spiff.currentUser.id).patch({'currentPassword': $scope.d.current, 'password': $scope.d.new});
     Messages.info("Password changed.");
   }
 })
@@ -19,7 +19,7 @@ angular.module('spiff.epicenter', [
 
   $scope.requestReset = function() {
     if ($scope.state == 0) {
-      SpiffRestangular.all('member').requestPasswordReset({'userid': $scope.d.userid}).then(function() {
+      SpiffRestangular.all('identity').requestPasswordReset({'userid': $scope.d.userid}).then(function() {
         $scope.state++;
       });
     } else if ($scope.state == 1) {
@@ -27,7 +27,7 @@ angular.module('spiff.epicenter', [
         $scope.state++;
       });
     } else if ($scope.state == 2) {
-      SpiffRestangular.one('member', Spiff.currentUser.id).patch({'currentPassword': $scope.d.code, 'password': $scope.d.newPass}).then(function() {
+      SpiffRestangular.one('identity', Spiff.currentUser.id).patch({'currentPassword': $scope.d.code, 'password': $scope.d.newPass}).then(function() {
         Messages.info("Password updated.");
         $modalInstance.close();
       });

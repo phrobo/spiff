@@ -1,4 +1,4 @@
-angular.module('spiff.members', [
+angular.module('spiff.identity', [
   'spiff',
   'restangular',
   'ui.bootstrap.progressbar',
@@ -6,7 +6,7 @@ angular.module('spiff.members', [
 ])
 
 .controller('MemberPaymentCtrl', function($scope, $modal, $stateParams, SpiffRestangular, Spiff) {
-  var user = SpiffRestangular.one('member', $stateParams.memberID);
+  var user = SpiffRestangular.one('identity', $stateParams.memberID);
   var payments = SpiffRestangular.all('payment');
   var invoices = SpiffRestangular.all('invoice');
 
@@ -86,7 +86,7 @@ angular.module('spiff.members', [
 })
 
 .controller('SubscriptionCtrl', function($scope, $modal, $stateParams, SpiffRestangular, Spiff) {
-  var user = SpiffRestangular.one('member', $stateParams.memberID);
+  var user = SpiffRestangular.one('identity', $stateParams.memberID);
   function refresh() {
     user.get().then(function (u) {
       $scope.user = u;
@@ -160,23 +160,23 @@ angular.module('spiff.members', [
     _.each(groups, function(group) {
       group.members = [];
       $scope.groups.push(group);
-      SpiffRestangular.all('member').getList({'groups__in': group.id}).then(function(members) {
-        group.members = members;
+      SpiffRestangular.all('identity').getList({'groups__in': group.id}).then(function(identities) {
+        group.identities = identities;
       });
     });
   });
-  $scope.members = SpiffRestangular.all('member').getList().$object;
+  $scope.identities = SpiffRestangular.all('identity').getList().$object;
 })
 
 .controller('MemberViewCtrl', function($scope, SpiffRestangular, $stateParams) {
-  var member = SpiffRestangular.one('member', $stateParams.memberID);
-  member.get().then(function (member) {
-    $scope.member = member;
-    $scope.periods = member.membershipRanges;
+  var identity = SpiffRestangular.one('identity', $stateParams.memberID);
+  identity.get().then(function (identity) {
+    $scope.identity = identity;
+    $scope.periods = identity.membershipRanges;
     SpiffRestangular.all('group').getList().then(function (groups) {
       $scope.availableGroups = groups;
       _.each(groups, function(group) {
-        if (_.find(member.groups, function(g) {return g.id == group.id;})) {
+        if (_.find(identity.groups, function(g) {return g.id == group.id;})) {
           group.active = true;
         } else {
           group.active = false;
@@ -191,7 +191,7 @@ angular.module('spiff.members', [
       newGroups.push("/v1/group/"+$(c).val()+"/");
     });
 
-    member.patch({'groups': newGroups}).then(function() {
+    identity.patch({'groups': newGroups}).then(function() {
       $('#modifyGroupsModal').modal('hide');
     });
   }

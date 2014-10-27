@@ -17,7 +17,7 @@ angular.module('spiff.editor', [
     $scope.objects = objs;
   });
 })
-.controller('EditorEditorCtrl', function($location, $scope, Spiff, SpiffRestangular, $stateParams) {
+.controller('EditorEditorCtrl', function($state, $scope, Spiff, SpiffRestangular, $stateParams) {
   $scope.type = $stateParams.type;
   Spiff.getSchema($stateParams.type).then(function(schema) {
     $scope.schema = schema;
@@ -38,7 +38,7 @@ angular.module('spiff.editor', [
     } else {
       SpiffRestangular.all($scope.type).post($scope.object).then(function(result) {
         console.log(result);
-        $location.url('/editor/edit/'+$scope.type+'/'+result.id);
+        $state.go('editor.edit', {type: $scope.type, id: result.id});
       });
     }
   };

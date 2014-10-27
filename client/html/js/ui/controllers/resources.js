@@ -112,7 +112,7 @@ angular.module('spiff.resources', [
 
       SpiffRestangular.all('training').post({
         resource: '/v1/resource/'+resource.id+'/',
-        member: '/v1/member/'+pending.id+'/',
+        identity: '/v1/identity/'+pending.id+'/',
         rank: rank,
       }).then(function(trainings) {
         $scope.refreshTrainings();
@@ -128,7 +128,7 @@ angular.module('spiff.resources', [
     console.log("Adding new user");
     console.log(newUser);
     $('#trainingModel #training-user').val('');
-    SpiffRestangular.all('member').search({fullName: newUser.searchName}).then(function(users) {
+    SpiffRestangular.all('identity').search({fullName: newUser.searchName}).then(function(users) {
       if (users.objects.length > 0) {
         var user = users.objects[0];
         newUser.fullName = user.firstName+" "+user.lastName;

@@ -36,7 +36,7 @@ angular.module('spiff.dashboard', [
       fields.push({id: field.id, value: field.value});
     })
 
-    SpiffRestangular.all('member').post({
+    SpiffRestangular.all('identity').post({
       username: $scope.d.username,
       password: $scope.d.password,
       email: $scope.d.email,

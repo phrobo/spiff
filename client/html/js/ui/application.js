@@ -5,7 +5,7 @@ var spiffApp = angular.module('spiffApp', [
   'spiff',
   'spiff.dashboard',
   'spiff.epicenter',
-  'spiff.members',
+  'spiff.identity',
   'spiff.resources',
   'spiff.donate',
   'spiff.sensors',
