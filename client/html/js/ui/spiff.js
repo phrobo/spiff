@@ -177,6 +177,9 @@ Spiff.provider('Spiff', function() {
           ret.resolve(scope.currentUser);
         });
       }
+      scope.$on('currentUser', function(user) {
+        ret.resolve(user);
+      });
       return ret.promise;
     };
 

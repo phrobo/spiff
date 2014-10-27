@@ -3,10 +3,10 @@ angular.module('spiff.dashboard', [
   'spiff'
 ])
 
-.controller('DashboardRegistrationCtrl', function(Spiff, $location) {
+.controller('DashboardRegistrationCtrl', function(Spiff, $state) {
   Spiff.getCurrentUser().then(function(user) {
     if (user && !user.isAnonymous) {
-      $location.url('/members/'+user.id);
+      $state.go('member.view', {'memberID': user.id});
     }
   });
 })
@@ -81,18 +81,17 @@ angular.module('spiff.dashboard', [
   $scope.cancel = function() {$modalInstance.close()};
 })
 
-.controller('DashboardCtrl', function(SpiffRestangular, $location, Spiff, $modal) {
+.controller('DashboardCtrl', function(SpiffRestangular, $state, Spiff, $modal) {
   Spiff.getCurrentUser().then(function(user) {
     if (user && !user.isAnonymous) {
-      $location.url('/members/'+user.id);
-    } else if (!user || (user && user.isAnonymous)) {
-      console.log(user);
-      $location.url('/welcome');
+      $state.go('member.view', {'memberID': user.id});
+    } else {
+      $state.go('welcome');
     }
   });
 })
 
-.controller('AnonDashCtrl', function($scope, $rootScope, $scope, Spiff, SpaceAPI, $location, $sce) {
+.controller('AnonDashCtrl', function($scope, $rootScope, $scope, Spiff, SpaceAPI, $state, $sce) {
   $scope.showLogin = function() {
     $rootScope.$broadcast('showLogin');
   }
@@ -106,8 +105,7 @@ angular.module('spiff.dashboard', [
 
   Spiff.getCurrentUser().then(function(user) {
     if (user && !user.isAnonymous) {
-      console.log(user);
-      $location.url('/');
+      $state.go('dashboard');
     }
   });
 });
