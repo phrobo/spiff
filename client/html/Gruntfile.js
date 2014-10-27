@@ -1,53 +1,42 @@
 module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
+    useminPrepare: {
+      html: 'app/index.html',
+      options: {
+        dest: 'dist'
+      }
+    },
+    usemin: {
+      html: 'dist/{*,*/}*.html',
+      css: 'dist/**/*.css',
+      options: {
+        dirs: ['dist']
+      }
+    },
     uglify: {
       options: {
-        mangle: false,
-        beautify: true,
-        sourceMap: true
-      },
-      deps: {
+        mangle: false
+      }
+    },
+    htmlmin: {
+      dist: {
         files: {
-          'app/lib/deps.js': [
-            'bower_components/jquery/jquery.js',
-            'bower_components/bootstrap/docs/assets/js/bootstrap.js',
-            'bower_components/jquery-ui/ui/jquery-ui.js',
-            'bower_components/jquery-qrcode/jquery.qrcode.min.js',
-            'bower_components/underscore/underscore.js',
-            'bower_components/angular/angular.js',
-            'bower_components/angular-route/angular-route.js',
-            'bower_components/restangular/dist/restangular.js',
-            'bower_components/angular-ui-bootstrap-bower/ui-bootstrap.js',
-            'bower_components/angular-ui-bootstrap-bower/ui-bootstrap-tpls.js',
-            'bower_components/angular-ui-router/release/angular-ui-router.js',
-            'bower_components/angular-gravatar/build/md5.js',
-            'bower_components/angular-gravatar/build/angular-gravatar.js',
-            'bower_components/showdown/src/showdown.js',
-            'bower_components/angular-sanitize/angular-sanitize.js',
-            'bower_components/angular-markdown-directive/markdown.js'
-          ]
-        }
-      },
-      app: {
-        files: {
-          'app/lib/app.js': [
-            'js/**/*.js'
-          ]
+          'dist/index.html': 'app/index.html'
         }
       }
     },
     less: {
       bootstrap: {
         files: {
-          'app/lib/bootstrap.css': 'bower_components/bootstrap/less/bootstrap.less'
+          'dist/bootstrap.css': 'bower_components/bootstrap/less/bootstrap.less'
         }
       }
     },
     sass: {
       app: {
         files: {
-          'app/lib/app.css': 'app/lib/app.scss',
+          'dist/app.css': 'app/lib/app.scss',
         },
       }
     },
@@ -58,19 +47,53 @@ module.exports = function(grunt) {
       },
       deps: {
         files: ["bower_components/**/*"],
-        tasks: ['bower', 'uglify:deps']
+        tasks: ['bower', 'uglify:generated']
       },
       scripts: {
         files: ['js/**/*.js', 'js/*.js'],
-        tasks: ['uglify:app'],
+        tasks: ['uglify:generated'],
+      }
+    },
+    filerev: {
+      js: {
+        src: 'dist/**/*.js'
+      },
+      css: {
+        src: 'dist/**/*.css'
+      }
+    },
+    ngtemplates: {
+      spiffApp: {
+        cwd: 'app',
+        src: '**/*.html',
+        dest: 'dist/templates.js'
       }
     }
   });
 
   grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-sass');
+  grunt.loadNpmTasks('grunt-contrib-cssmin');
   grunt.loadNpmTasks('grunt-contrib-less');
-  grunt.registerTask('default', ['less', 'sass', 'uglify:deps', 'uglify:app']);
+  grunt.loadNpmTasks('grunt-angular-templates');
+  grunt.loadNpmTasks('grunt-contrib-htmlmin');
+  grunt.loadNpmTasks('grunt-filerev');
+  grunt.loadNpmTasks('grunt-usemin');
+
+  grunt.registerTask('build', [
+    'less',
+    'sass',
+    'useminPrepare',
+    'htmlmin',
+    'concat',
+    'cssmin',
+    'uglify',
+    'ngtemplates',
+    'usemin'
+  ]);
+
+  grunt.registerTask('default', ['build']);
 
 };

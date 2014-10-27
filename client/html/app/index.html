@@ -2,13 +2,53 @@
 <html ng-app="spiffApp">
 <head>
   <meta charset="utf-8">
-  <link rel="stylesheet" type="text/css" href="lib/app.css"/>
+
+  <!-- build:css app.css -->
+  <link rel="stylesheet" type="text/css" href="../dist/bootstrap.css"/>
+  <link rel="stylesheet" type="text/css" href="../dist/app.css"/>
   <link rel="stylesheet" type="text/css" href="css/ui-lightness/jquery-ui-1.10.4.custom.css"/>
+  <!-- endbuild -->
+
   <script>var CONFIG = {spaceAPI: '/status.json', spiff: '/'};</script>
   <script src="config.js"></script>
 
-  <script src="lib/deps.js"></script>
-  <script src="lib/app.js"></script>
+  <!-- build:js deps.js -->
+  <script src="../bower_components/jquery/jquery.js"></script>
+  <script src="../bower_components/bootstrap/docs/assets/js/bootstrap.js"></script>
+  <script src="../bower_components/jquery-ui/ui/jquery-ui.js"></script>
+  <script src="../bower_components/jquery-qrcode/jquery.qrcode.min.js"></script>
+  <script src="../bower_components/underscore/underscore.js"></script>
+  <script src="../bower_components/angular/angular.js"></script>
+  <script src="../bower_components/angular-route/angular-route.js"></script>
+  <script src="../bower_components/angular-ui-router/release/angular-ui-router.js"></script>
+  <script src="../bower_components/restangular/src/restangular.js"></script>
+  <script src="../bower_components/angular-ui-bootstrap-bower/ui-bootstrap.js"></script>
+  <script src="../bower_components/angular-ui-bootstrap-bower/ui-bootstrap-tpls.js"></script>
+  <script src="../bower_components/angular-gravatar/build/md5.js"></script>
+  <script src="../bower_components/angular-gravatar/build/angular-gravatar.js"></script>
+  <script src="../bower_components/showdown/src/showdown.js"></script>
+  <script src="../bower_components/angular-sanitize/angular-sanitize.js"></script>
+  <script src="../bower_components/angular-markdown-directive/markdown.js"></script>
+  <!-- endbuild -->
+
+  <!-- build:js app.js -->
+  <script src="../js/md5-service.js"></script>
+  <script src="../js/ui/application.js"></script>
+  <script src="../js/ui/directives.js"></script>
+  <script src="../js/ui/messages.js"></script>
+  <script src="../js/ui/spaceapi.js"></script>
+  <script src="../js/ui/spiff.js"></script>
+  <script src="../js/ui/controllers/dashboard.js"></script>
+  <script src="../js/ui/controllers/donate.js"></script>
+  <script src="../js/ui/controllers/editor.js"></script>
+  <script src="../js/ui/controllers/epicenter.js"></script>
+  <script src="../js/ui/controllers/members.js"></script>
+  <script src="../js/ui/controllers/payment.js"></script>
+  <script src="../js/ui/controllers/resources.js"></script>
+  <script src="../js/ui/controllers/sensors.js"></script>
+  <!-- endbuild -->
+
+  <script src="templates.js"></script>
 
   <title>Spiff</title>
 </head>
