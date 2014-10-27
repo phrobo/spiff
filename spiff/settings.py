@@ -121,6 +121,7 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
+# The following apps are required
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -133,20 +134,24 @@ INSTALLED_APPS = (
     'django_openid_auth',
     'openid_provider',
     'notification',
-    'spiff.api',
-    'spiff.membership',
-    'spiff.subscription',
-    'spiff.donations',
-    'spiff.identity',
-    'spiff.inventory',
-    'spiff.local',
-    'spiff.events',
-    'spiff.sensors',
-    'spiff.payment',
-    'spiff.federation',
-    'spiff.unwelcome',
-    'django_nose',
     'corsheaders',
+    'spiff.api',
+    'spiff.identity',
+    'spiff.local',
+    'spiff.federation',
+)
+
+SPIFF_APPS = (
+# The following are optional
+#    'spiff.membership',
+#    'spiff.subscription',
+#    'spiff.donations',
+#    'spiff.inventory',
+#    'spiff.events',
+#    'spiff.sensors',
+#    'spiff.payment',
+#    'spiff.unwelcome',
+#    'django_nose',
 )
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
@@ -233,3 +238,5 @@ try:
   from local_settings import *
 except ImportError:
   pass
+
+INSTALLED_APPS += SPIFF_APPS
