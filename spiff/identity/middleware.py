@@ -22,3 +22,7 @@ class AnonymousUserMiddleware(object):
     else:
       request.user = models.AuthenticatedUser.objects.get(pk=request.user.pk)
     return None
+
+class IdentityMiddleware(object):
+  def process_request(self, request):
+    request.identity = request.user.identity

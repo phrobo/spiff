@@ -10,17 +10,17 @@ from spiff.api import SpiffAuthorization, OwnedObjectAuthorization
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
 
 class CreditResource(ModelResource):
-  user = fields.ToOneField('spiff.identity.v1_api.UserResource', 'user')
+  identity = fields.ToOneField('spiff.identity.v1_api.IentityResource', 'identity')
   value = fields.FloatField('value')
   description = fields.CharField('description')
   created = fields.DateTimeField('created')
 
   class Meta:
     queryset = models.Credit.objects.all()
-    authorization = OwnedObjectAuthorization('user')
+    authorization = OwnedObjectAuthorization('identity')
     always_return_data = True
     filtering = {
-      'user': ALL_WITH_RELATIONS,
+      'identity': ALL_WITH_RELATIONS,
       'value': ALL_WITH_RELATIONS,
       'description': ALL_WITH_RELATIONS,
       'created': ALL_WITH_RELATIONS
@@ -29,7 +29,7 @@ class CreditResource(ModelResource):
 class PaymentResource(ModelResource):
   invoice = fields.ToOneField('spiff.payment.v1_api.InvoiceResource', 'invoice')
   value = fields.FloatField('value')
-  user = fields.ToOneField('spiff.identity.v1_api.UserResource', 'user')
+  identity = fields.ToOneField('spiff.identity.v1_api.IdentityResource', 'identity')
   method = fields.IntegerField('method')
 
   class Meta:
@@ -37,7 +37,7 @@ class PaymentResource(ModelResource):
     authorization = SpiffAuthorization()
     always_return_data = True
     filtering = {
-        'user': ALL_WITH_RELATIONS,
+        'identity': ALL_WITH_RELATIONS,
         'value': ALL_WITH_RELATIONS,
         'method': ALL_WITH_RELATIONS,
         'invoice': ALL_WITH_RELATIONS,
@@ -62,10 +62,10 @@ class PaymentResource(ModelResource):
         amount = int(balance*100),
         currency = 'usd',
         card = cardData,
-        description = 'Payment from %s for invoice %s'%(bundle.request.user.member.fullName, invoice.id)
+        description = 'Payment from %s for invoice %s'%(bundle.request.identity.displayName, invoice.id)
       )
       payment = models.Payment.objects.create(
-        user = bundle.request.user,
+        identity = bundle.request.identity,
         value = balance,
         status = models.Payment.STATUS_PAID,
         transactionID = charge.id,
@@ -74,9 +74,9 @@ class PaymentResource(ModelResource):
       )
       if notification:
         notification.send(
-          [bundle.request.user],
+          [bundle.request.identity],
           'payment_received',
-          {'user': bundle.request.user, 'payment': payment}
+          {'identity': bundle.request.identity, 'payment': payment}
         )
       bundle.obj = payment
       return bundle
@@ -103,7 +103,8 @@ class LineItemResource(ModelResource):
     always_return_data = True
 
 class InvoiceResource(ModelResource):
-  user = fields.ToOneField('spiff.identity.v1_api.UserResource', attribute='user',
+  identity = fields.ToOneField('spiff.identity.v1_api.IdentityResource',
+      attribute='identity',
       null=True, full=False)
   unpaidBalance = fields.FloatField('unpaidBalance', readonly=True)
   paidBalance = fields.FloatField('paidBalance', readonly=True)
@@ -116,5 +117,5 @@ class InvoiceResource(ModelResource):
     authorization = SpiffAuthorization()
     always_return_data = True
     filtering = {
-        'user': ALL_WITH_RELATIONS
+        'identity': ALL_WITH_RELATIONS
     }

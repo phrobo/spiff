@@ -5,11 +5,8 @@ from django.contrib.auth.models import User, Group
 from django.db.models.signals import post_save, post_syncdb
 from south.signals import post_migrate
 from openid_provider.models import OpenID
-from spiff.identity.utils import monthRange
 import datetime
 from django.conf import settings
-import spiff.payment.models
-from spiff.subscription.models import SubscriptionPlan
 from spiff import funcLog
 from django.core.exceptions import ValidationError
 from django.db.models import Q
@@ -33,24 +30,20 @@ class UserResetToken(models.Model):
 
 class Identity(models.Model):
   tagline = models.CharField(max_length=255)
-  user = models.OneToOneField(User, related_name='member')
+  user = models.OneToOneField(User, related_name='identity')
   created = models.DateTimeField(editable=False, auto_now_add=True)
   lastSeen = models.DateTimeField(editable=False, auto_now_add=True)
   fields = models.ManyToManyField('Field', through='FieldValue')
   hidden = models.BooleanField(default=False)
   displayName = models.TextField()
 
-  @property
-  def availableCredit(self):
-    return spiff.payment.models.Credit.objects.userTotal(self)
-
   def isAnonymous(self):
     return self.user_id == get_anonymous_user().id
 
   class Meta:
     permissions = (
-      ('can_view_hidden_members', 'Can view hidden members'),
-      ('list_members', 'Can list members'),
+      ('can_view_hidden_identities', 'Can view hidden identities'),
+      ('list_identities', 'Can list identities'),
     )
 
   @property
@@ -77,49 +70,10 @@ class Identity(models.Model):
     groups = self.user.groups.filter(rank__isKeyholder=True)
     return len(groups) > 0
 
-  @property
-  def lastMembershipPeriod(self):
-    periods = MembershipPeriod.objects.filter(member=self).extra(order_by=['-activeToDate'])
-    if len(periods) == 0:
-      return None
-    return periods[0]
-
-  @property
-  def membershipRanges(self):
-    ret = []
-    for p in self.membershipPeriods.all():
-      dates = p.contiguousDates
-      thisRange = ({'start': dates[0], 'end': dates[1], 'rank_id': p.rank.id})
-      if thisRange not in ret:
-        ret.append(thisRange)
-    return ret
-
-  def activeMember(self):
-    if not self.user.is_active:
-      return False
-    return self.user.groups.filter(rank__isActiveMembership=True).exists()
-
   def __unicode__(self):
     if self.hidden:
       return "Anonymous"
     return self.displayName
-
-class Rank(models.Model):
-  description = models.TextField(blank=True)
-  monthlyDues = models.FloatField(default=0)
-  group = models.OneToOneField(Group)
-  isActiveMembership = models.BooleanField(default=False)
-  isKeyholder = models.BooleanField(default=False)
-
-  class Meta:
-    permissions = (
-      ('can_change_member_rank', 'Can change member ranks'),
-      ('can_view_member_rank', 'Can view member ranks'),
-      ('can_deactivate_user', 'Can deactivate a user account'),
-    )
-
-  def __unicode__(self):
-    return self.group.name
 
 class Field(models.Model):
   name = models.CharField(max_length=100)
@@ -139,148 +93,18 @@ class Field(models.Model):
 
 class FieldValue(models.Model):
   field = models.ForeignKey(Field)
-  member = models.ForeignKey(Identity, related_name='attributes')
+  identity = models.ForeignKey(Identity, related_name='attributes')
   value = models.TextField()
 
   def __unicode__(self):
-    return "%s: %s = %s"%(self.member.fullName, self.field.name, self.value)
+    return "%s: %s = %s"%(self.identity.displayName, self.field.name, self.value)
 
-class RankSubscriptionPlan(SubscriptionPlan):
-    rank = models.ForeignKey(Rank, related_name='subscriptions')
-    member = models.ForeignKey(Identity, related_name='rankSubscriptions',
-        blank=True, null=True)
-    quantity = models.IntegerField(default=1)
-
-    def calculatePeriodCost(self):
-      return self.rank.monthlyDues * self.quantity
-
-    def createLineItems(self, subscription, processDate):
-      targetMember = self.member
-      if targetMember is None:
-        targetMember = subscription.user.member
-      planOwner = subscription.user
-      startOfMonth, endOfMonth = monthRange(processDate)
-
-      funcLog().info("Processing subscription of %s dues for %s, billing to %s", self.rank, self.member, planOwner)
-      endOfMonth += datetime.timedelta(days=1)
-
-      for range in targetMember.membershipRanges:
-        if range['start'] <= startOfMonth and range['end'] >= endOfMonth:
-          return []
-        if RankLineItem.objects.filter(rank=self.rank, member=targetMember,
-            activeFromDate=startOfMonth, activeToDate=endOfMonth).exists():
-          return []
-
-      return [RankLineItem(
-        rank = self.rank,
-        member = targetMember,
-        activeFromDate = startOfMonth,
-        activeToDate = endOfMonth
-      ),]
-
-    def __unicode__(self):
-      return "%sx%s for %s, %s"%(self.rank, self.quantity, self.member, self.period)
-
-class RankLineItem(spiff.payment.models.LineItem):
-    rank = models.ForeignKey(Rank)
-    member = models.ForeignKey(Identity, related_name='rankLineItems')
-    activeFromDate = models.DateTimeField(default=datetime.datetime.utcnow())
-    activeToDate = models.DateTimeField(default=datetime.datetime.utcnow())
-
-    def process(self):
-      period, created = MembershipPeriod.objects.get_or_create(
-        rank = self.rank,
-        member = self.member,
-        activeFromDate = self.activeFromDate,
-        activeToDate = self.activeToDate,
-        lineItem = self
-      )
-      if created:
-        u = self.member.user
-        u.groups.add(self.rank.group)
-        u.save()
-        funcLog().info("Processed %s - added %s to group %s", self, self.member,
-            self.rank.group)
-
-    def save(self, *args, **kwargs):
-        self.unitPrice = self.rank.monthlyDues
-        self.name = "%s membership dues for %s, %s to %s"%(self.rank, self.member, self.activeFromDate, self.activeToDate)
-        super(RankLineItem, self).save(*args, **kwargs)
-
-class MembershipPeriod(models.Model):
-    rank = models.ForeignKey(Rank)
-    member = models.ForeignKey(Identity, related_name='membershipPeriods')
-    activeFromDate = models.DateTimeField(default=datetime.datetime.utcnow())
-    activeToDate = models.DateTimeField(default=datetime.datetime.utcnow())
-    lineItem = models.ForeignKey(RankLineItem, default=None, null=True, blank=True)
-
-    class Meta:
-      index_together = [
-        ['activeFromDate', 'activeToDate']
-      ]
-
-
-    @property
-    def contiguousPeriods(self):
-      dates = self.contiguousDates
-      range = MembershipPeriod.objects.filter(
-        rank = self.rank,
-        member = self.member,
-        activeFromDate__gte=dates[0],
-        activeToDate__lte=dates[1]
-      )
-      funcLog().debug("Found %s!", range)
-      return range
-
-    @property
-    def contiguousDates(self):
-      start = self
-      end = self
-      seen = []
-      overlapQueue = [self]
-      cursor = connection.cursor()
-      cursor.execute("\
-        SELECT MIN(a.activeFromDate), MAX(b.activeToDate) \
-        FROM identity_membershipperiod AS a \
-        LEFT JOIN identity_membershipperiod AS b \
-        ON \
-          ( a.activeToDate >= b.activeFromDate OR \
-          a.activeFromDate <= b.activeToDate) AND \
-          a.member_id = b.member_id \
-          WHERE a.member_id = %s AND \
-          a.activeFromDate <= %s AND \
-          b.activeToDate >= %s", [self.member.id, self.activeFromDate,
-            self.activeToDate])
-      row = cursor.fetchone()
-      return (row[0], row[1])
-
-    @property
-    def siblings(self):
-      return self.overlapping.filter(Q(activeFromDate=self.activeToDate) | Q(activeToDate=self.activeFromDate))
-
-    @property
-    def overlapping(self):
-      return MembershipPeriod.objects.filter(
-        Q(activeFromDate__gte=self.activeFromDate, activeFromDate__lte=self.activeToDate) | 
-        Q(activeToDate__gte=self.activeFromDate, activeToDate__lte=self.activeToDate)
-      ).filter(rank=self.rank, member=self.member).exclude(pk=self.pk)
-
-    def __unicode__(self):
-      return "%s, %s: %s to %s"%(self.member, self.rank, self.activeFromDate,
-          self.activeToDate)
-
-def create_member(sender, instance, created, **kwargs):
+def create_identity(sender, instance, created, **kwargs):
   if created:
     Identity.objects.get_or_create(user=instance)
     OpenID.objects.get_or_create(user=instance, default=True)
 
-post_save.connect(create_member, sender=User)
-
-def create_rank(sender, instance, created, **kwargs):
-  if created:
-    Rank.objects.get_or_create(group=instance)
-
-post_save.connect(create_rank, sender=Group)
+post_save.connect(create_identity, sender=User)
 
 class AuthenticatedUser(User):
   class Meta:
@@ -333,11 +157,6 @@ def get_authenticated_user_group():
       )
   else:
     group = AuthenticatedUserGroup.objects.get(id=settings.AUTHENTICATED_GROUP_ID)
-  try:
-    rank = group.rank
-  except Rank.DoesNotExist:
-    group.rank, created = Rank.objects.get_or_create(group=group)
-    group.save()
   return group
 
 def get_anonymous_user():
@@ -354,23 +173,22 @@ def get_anonymous_user():
       )
       user.set_unusable_password()
       user.save()
-      member = Identity.objects.get(
+      identity = Identity.objects.get(
         user=user,
         displayName='Guest McGuesterson'
       )
-      member.hidden = True
-      member.save()
+      identity.hidden = True
+      identity.save()
   else:
     user = User.objects.get(id=settings.ANONYMOUS_USER_ID)
   try:
-    member = user.member
+    identity = user.identity
   except Identity.DoesNotExist:
-    user.member, created = Identity.objects.get_or_create(user=user)
+    user.identity, created = Identity.objects.get_or_create(user=user)
     user.save()
   return user
 
-post_save.connect(create_member, sender=AnonymousUser)
-post_save.connect(create_rank, sender=AuthenticatedUserGroup)
+post_save.connect(create_identity, sender=AnonymousUser)
 
 def ensure_auth_objects(*args, **kwargs):
   try:

@@ -101,8 +101,8 @@ class APITestMixin(SpaceAPITestMixin):
     funcLog().info("Creating user %s with password %s", username, password)
     user = User.objects.create_user(username, 'test@example.com', password)
     user.save()
-    user.member.displayName = 'Test McTesterson'
-    user.member.save()
+    user.identity.displayName = 'Test McTesterson'
+    user.identity.save()
     return user
 
   def createGroup(self, name):

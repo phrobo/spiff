@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from spiff.identity.models import Identity
 from django.utils.timezone import utc
 import datetime
 
@@ -50,7 +50,7 @@ class SubscriptionPlan(models.Model):
       return "%s, %s"%(self.name, self.period)
 
 class Subscription(models.Model):
-    user = models.ForeignKey(User, related_name='subscriptions')
+    identity = models.ForeignKey(Identity, related_name='subscriptions')
     active = models.BooleanField(default=True)
     plan = models.ForeignKey(SubscriptionPlan, related_name='subscriptions')
     lastProcessed = models.DateTimeField(default=None, null=True, blank=True)
@@ -70,4 +70,4 @@ class Subscription(models.Model):
       return nextRun
 
     def __unicode__(self):
-      return "%s: %s"%(self.user, self.plan)
+      return "%s: %s"%(self.identity, self.plan)

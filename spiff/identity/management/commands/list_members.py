@@ -1,11 +1,10 @@
 from django.core.management import BaseCommand
-from spiff.membership.models import Member
+from spiff.identity.models import Identity
 
 class Command(BaseCommand):
   help = 'Lists active member email addresses'
 
   def handle(self, *args, **options):
-    members = Member.objects.all()
-    for m in members:
-      if m.activeMember():
-        print m.user.email
+    identities = Identity.objects.all()
+    for i in identity:
+      print i.user.email

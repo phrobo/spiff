@@ -2,7 +2,6 @@ from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from south.signals import post_migrate
 from django.db.models.signals import post_syncdb
-import tastypie.resources
 import spiff.api.plugins
 from spiff.api import SpiffAuthorization
 from spiff import funcLog
@@ -12,6 +11,7 @@ def add_resource_permissions(*args, **kwargs):
   This syncdb hooks takes care of adding a view permission too all our 
   content types.
   """
+  import tastypie.resources
   # for each of our content types
   for resource in spiff.api.plugins.find_api_classes('v1_api', tastypie.resources.ModelResource):
     auth = resource._meta.authorization

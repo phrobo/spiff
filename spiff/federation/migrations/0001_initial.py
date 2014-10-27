@@ -7,20 +7,22 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('auth', '0001_initial'),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Event',
+            name='Federation',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('start', models.DateTimeField()),
-                ('end', models.DateTimeField()),
-                ('name', models.TextField()),
-                ('description', models.TextField()),
+                ('url', models.TextField()),
+                ('lastContact', models.DateTimeField()),
+                ('ttl', models.IntegerField()),
+                ('enabled', models.BooleanField(default=True)),
+                ('alias', models.TextField()),
+                ('permissions', models.ManyToManyField(to='auth.Permission')),
             ],
             options={
-                'permissions': (('can_reserve_resource', 'Can attach resources to events'),),
             },
             bases=(models.Model,),
         ),

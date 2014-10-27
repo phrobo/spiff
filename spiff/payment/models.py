@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from spiff.identity.models import Identity
 from django.utils.timezone import utc
 import datetime
 import stripe
@@ -16,7 +16,7 @@ if not hasattr(settings, 'STRIPE_KEY'):
 stripe.api_key = settings.STRIPE_KEY
 
 class StripeProxy(models.Model):
-  user = models.ForeignKey(User, related_name='stripe')
+  identity = models.ForeignKey(Identity, related_name='stripe')
   stripeID = models.TextField()
 
   @property
@@ -26,7 +26,7 @@ class StripeProxy(models.Model):
     except stripe.InvalidRequestError:
       customer = stripe.Customer.create(
         description = self.fullName,
-        email = self.user.email
+        email = self.identity.email
       )
       self.stripeID = customer.id
       self.save()
@@ -75,19 +75,19 @@ class InvoiceManager(models.Manager):
         return self.unpaid().filter(dueDate__lt=datetime.date.utcnow().replace(tzinfo=utc), draft=False)
 
 class Invoice(models.Model):
-    user = models.ForeignKey(User, related_name='invoices')
+    identity = models.ForeignKey(Identity, related_name='invoices')
     created = models.DateTimeField(auto_now_add=True)
     dueDate = models.DateField()
     open = models.BooleanField(default=True)
     draft = models.BooleanField(default=True)
 
     @classmethod
-    def bundleLineItems(cls, user, dueDate, items):
+    def bundleLineItems(cls, identity, dueDate, items):
       if len(items) == 0:
         return None
 
       invoice = Invoice.objects.create(
-        user = user,
+        identity = identity,
         dueDate = dueDate,
       )
       for item in items:
@@ -97,19 +97,19 @@ class Invoice(models.Model):
 
     class Meta:
       permissions = (
-        ('view_other_invoices', 'Can view invoices assigned to other users'),
+        ('view_other_invoices', 'Can view invoices assigned to other identities'),
       )
 
     def chargeStripe(self):
-      stripeCustomer = self.user.member.stripeCustomer()
+      stripeCustomer = self.identity.stripe.customer()
       charge = stripe.Charge.create(
         amount = int(self.unpaidBalance*100),
         currency = 'usd',
-        description = 'Payment from %s for invoice %s'%(self.user.member.fullName, self.id),
+        description = 'Payment from %s for invoice %s'%(self.identity.displayName, self.id),
         customer = stripeCustomer.id
       )
       Payment.objects.create(
-        user = self.user,
+        identity = self.identity,
         value = self.unpaidBalance,
         status = Payment.STATUS_PAID,
         transactionID = charge.id,
@@ -128,9 +128,9 @@ class Invoice(models.Model):
               funcLog().error("Failed to charge stripe")
               funcLog().exception(e)
               notification.send(
-                [self.user],
+                [self.identity],
                 "card_failed",
-                {'user': self.user, 'invoice': self})
+                {'identity': self.identity, 'invoice': self})
       super(Invoice, self).save(*args, **kwargs)
 
     @property
@@ -197,12 +197,12 @@ class LineDiscountItem(models.Model):
       return self.flatRate
 
 class CreditManager(models.Manager):
-    def forUser(self, user):
-        return self.filter(user=user)
+    def forIdentity(self, identity):
+        return self.filter(identity=identity)
 
-    def userTotal(self, user):
-        totalCredit = self.forUser(user).aggregate(models.Sum('value'))
-        totalUsedCredit = Payment.objects.filter(user=user,
+    def identityTotal(self, identity):
+        totalCredit = self.forIdentity(identity).aggregate(models.Sum('value'))
+        totalUsedCredit = Payment.objects.filter(identity=identity,
             method=Payment.METHOD_CREDIT).aggregate(models.Sum('value'))
         if totalUsedCredit['value__sum'] is None:
           totalUsedCredit['value__sum'] = 0
@@ -213,7 +213,7 @@ class CreditManager(models.Manager):
 class Credit(models.Model):
     objects = CreditManager()
 
-    user = models.ForeignKey(User, related_name='credits')
+    identity = models.ForeignKey(Identity, related_name='credits')
     value = models.FloatField()
     created = models.DateTimeField(auto_now_add=True)
     description = models.TextField()
@@ -237,7 +237,7 @@ class Payment(models.Model):
         (STATUS_PENDING, 'Pending'),
         (STATUS_PAID, 'Paid'),
     )
-    user = models.ForeignKey(User, related_name='payments')
+    identity = models.ForeignKey(Identity, related_name='payments')
     value = models.FloatField()
     created = models.DateTimeField(auto_now_add=True)
     status = models.IntegerField(default=STATUS_PENDING, choices=STATUS)
@@ -250,9 +250,9 @@ class Payment(models.Model):
             self.created = datetime.datetime.utcnow().replace(tzinfo=utc)
             if notification:
               notification.send(
-                [self.user],
+                [self.identity],
                 "payment_received",
-                {'user': self.user, 'payment': self})
+                {'identity': self.identity, 'payment': self})
         super(Payment, self).save(*args, **kwargs)
         if self.invoice.unpaidBalance == 0:
             self.invoice.open = False
@@ -262,5 +262,6 @@ class Payment(models.Model):
                 item.process()
 
     def __unicode__(self):
-        return "%d %s by %s for %s"%(self.value, self.get_method_display(), self.user, self.invoice)
+        return "%d %s by %s for %s"%(self.value, self.get_method_display(),
+            self.identity, self.invoice)
 

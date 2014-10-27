@@ -4,7 +4,7 @@ from tastypie.resources import ModelResource
 import models
 
 class TrainingResource(ModelResource):
-  member = fields.ToOneField('spiff.identity.v1_api.MemberResource', 'member', full=True)
+  identity = fields.ToOneField('spiff.identity.v1_api.IdentityResource', 'identity', full=True)
   resource = fields.ToOneField('spiff.inventory.v1_api.ResourceResource', 'resource')
   rank = fields.CharField('comment', blank=True)
 
@@ -31,7 +31,7 @@ class ResourceMetadataResource(ModelResource):
     bundle = super(ResourceMetadataResource, self).obj_create(
       bundle, **kwargs)
     bundle.obj.resource.logChange(
-      member=bundle.request.user.member,
+      identity=bundle.request.identity,
       property=bundle.obj.name,
       new=bundle.obj.value)
     return bundle
@@ -41,7 +41,7 @@ class ResourceMetadataResource(ModelResource):
     bundle = super(ResourceMetadataResource, self).obj_update(
       bundle, **kwargs)
     bundle.obj.resource.logChange(
-      member=bundle.request.user.member,
+      identity=bundle.request.identity,
       property=bundle.obj.name,
       new=bundle.obj.value,
       old=oldVal)
@@ -51,18 +51,18 @@ class ResourceMetadataResource(ModelResource):
     oldMeta = models.Metadata.objects.get(pk=kwargs['pk'])
     oldName = oldMeta.name
     oldValue = oldMeta.value
-    oldMember = bundle.request.user.member
+    oldIdentity = bundle.request.identity
     bundle = super(ResourceMetadataResource, self).obj_delete(
       bundle, **kwargs)
     oldMeta.resource.logChange(
-      member=oldMember,
+      identity=oldIdentity,
       property=oldName,
       old=oldValue,
       new=None)
     return bundle
 
 class ChangelogResource(ModelResource):
-  member = fields.ToOneField('spiff.identity.v1_api.MemberResource', 'member', full=True)
+  identity = fields.ToOneField('spiff.identity.v1_api.IdentityResource', 'identity', full=True)
   old = fields.CharField('old', null=True)
   new = fields.CharField('new', null=True)
   property = fields.CharField('property', null=True)

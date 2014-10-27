@@ -34,18 +34,18 @@ class SubscriptionPlanResource(ModelResource):
     }
 
 class SubscriptionResource(ModelResource):
-  user = fields.ToOneField('spiff.identity.v1_api.UserResource',
-      'user', null=True)
+  identity = fields.ToOneField('spiff.identity.v1_api.IdentityResource',
+      'identity', null=True)
   active = fields.BooleanField('active')
   plan = fields.ToOneField('spiff.subscription.v1_api.SubscriptionPlanResource',
   'plan', full=True)
 
   class Meta:
     queryset = models.Subscription.objects.all()
-    authorization = OwnedObjectAuthorization('user')
+    authorization = OwnedObjectAuthorization('identity')
     always_return_data = True
     filtering = {
-      'user': ALL_WITH_RELATIONS,
+      'identitiy': ALL_WITH_RELATIONS,
       'active': ALL_WITH_RELATIONS,
       'plan': ALL_WITH_RELATIONS
     }

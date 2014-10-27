@@ -1,185 +1,101 @@
 # -*- coding: utf-8 -*-
-from south.utils import datetime_utils as datetime
-from south.db import db
-from south.v2 import SchemaMigration
-from django.db import models
+from __future__ import unicode_literals
+
+from django.db import models, migrations
 
 
-class Migration(SchemaMigration):
+class Migration(migrations.Migration):
 
-    def forwards(self, orm):
-        # Adding model 'StripeProxy'
-        db.create_table(u'payment_stripeproxy', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(related_name='stripe', to=orm['auth.User'])),
-            ('stripeID', self.gf('django.db.models.fields.TextField')()),
-        ))
-        db.send_create_signal(u'payment', ['StripeProxy'])
+    dependencies = [
+        ('identity', '0001_initial'),
+    ]
 
-        # Adding model 'Invoice'
-        db.create_table(u'payment_invoice', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(related_name='invoices', to=orm['auth.User'])),
-            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('dueDate', self.gf('django.db.models.fields.DateField')()),
-            ('open', self.gf('django.db.models.fields.BooleanField')(default=True)),
-            ('draft', self.gf('django.db.models.fields.BooleanField')(default=True)),
-        ))
-        db.send_create_signal(u'payment', ['Invoice'])
-
-        # Adding model 'LineItem'
-        db.create_table(u'payment_lineitem', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('invoice', self.gf('django.db.models.fields.related.ForeignKey')(related_name='items', to=orm['payment.Invoice'])),
-            ('name', self.gf('django.db.models.fields.TextField')()),
-            ('unitPrice', self.gf('django.db.models.fields.FloatField')(default=0)),
-            ('quantity', self.gf('django.db.models.fields.FloatField')(default=1)),
-        ))
-        db.send_create_signal(u'payment', ['LineItem'])
-
-        # Adding model 'LineDiscountItem'
-        db.create_table(u'payment_linediscountitem', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('invoice', self.gf('django.db.models.fields.related.ForeignKey')(related_name='discounts', to=orm['payment.Invoice'])),
-            ('description', self.gf('django.db.models.fields.TextField')()),
-            ('flatRate', self.gf('django.db.models.fields.FloatField')(default=0)),
-            ('percent', self.gf('django.db.models.fields.FloatField')(default=0)),
-            ('lineItem', self.gf('django.db.models.fields.related.ForeignKey')(related_name='discounts', to=orm['payment.LineItem'])),
-        ))
-        db.send_create_signal(u'payment', ['LineDiscountItem'])
-
-        # Adding model 'Credit'
-        db.create_table(u'payment_credit', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(related_name='credits', to=orm['auth.User'])),
-            ('value', self.gf('django.db.models.fields.FloatField')()),
-            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('description', self.gf('django.db.models.fields.TextField')()),
-        ))
-        db.send_create_signal(u'payment', ['Credit'])
-
-        # Adding model 'Payment'
-        db.create_table(u'payment_payment', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(related_name='payments', to=orm['auth.User'])),
-            ('value', self.gf('django.db.models.fields.FloatField')()),
-            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('status', self.gf('django.db.models.fields.IntegerField')(default=0)),
-            ('transactionID', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
-            ('method', self.gf('django.db.models.fields.IntegerField')()),
-            ('invoice', self.gf('django.db.models.fields.related.ForeignKey')(related_name='payments', to=orm['payment.Invoice'])),
-        ))
-        db.send_create_signal(u'payment', ['Payment'])
-
-
-    def backwards(self, orm):
-        # Deleting model 'StripeProxy'
-        db.delete_table(u'payment_stripeproxy')
-
-        # Deleting model 'Invoice'
-        db.delete_table(u'payment_invoice')
-
-        # Deleting model 'LineItem'
-        db.delete_table(u'payment_lineitem')
-
-        # Deleting model 'LineDiscountItem'
-        db.delete_table(u'payment_linediscountitem')
-
-        # Deleting model 'Credit'
-        db.delete_table(u'payment_credit')
-
-        # Deleting model 'Payment'
-        db.delete_table(u'payment_payment')
-
-
-    models = {
-        u'auth.group': {
-            'Meta': {'object_name': 'Group'},
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '80'}),
-            'permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['auth.Permission']", 'symmetrical': 'False', 'blank': 'True'})
-        },
-        u'auth.permission': {
-            'Meta': {'ordering': "(u'content_type__app_label', u'content_type__model', u'codename')", 'unique_together': "((u'content_type', u'codename'),)", 'object_name': 'Permission'},
-            'codename': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['contenttypes.ContentType']"}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '50'})
-        },
-        u'auth.user': {
-            'Meta': {'object_name': 'User'},
-            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
-            'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
-            'first_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
-            'groups': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "u'user_set'", 'blank': 'True', 'to': u"orm['auth.Group']"}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'is_staff': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'is_superuser': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
-            'last_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
-            'password': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
-            'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "u'user_set'", 'blank': 'True', 'to': u"orm['auth.Permission']"}),
-            'username': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '30'})
-        },
-        u'contenttypes.contenttype': {
-            'Meta': {'ordering': "('name',)", 'unique_together': "(('app_label', 'model'),)", 'object_name': 'ContentType', 'db_table': "'django_content_type'"},
-            'app_label': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
-        },
-        u'payment.credit': {
-            'Meta': {'object_name': 'Credit'},
-            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'description': ('django.db.models.fields.TextField', [], {}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'credits'", 'to': u"orm['auth.User']"}),
-            'value': ('django.db.models.fields.FloatField', [], {})
-        },
-        u'payment.invoice': {
-            'Meta': {'object_name': 'Invoice'},
-            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'draft': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'dueDate': ('django.db.models.fields.DateField', [], {}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'open': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'invoices'", 'to': u"orm['auth.User']"})
-        },
-        u'payment.linediscountitem': {
-            'Meta': {'object_name': 'LineDiscountItem'},
-            'description': ('django.db.models.fields.TextField', [], {}),
-            'flatRate': ('django.db.models.fields.FloatField', [], {'default': '0'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'invoice': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'discounts'", 'to': u"orm['payment.Invoice']"}),
-            'lineItem': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'discounts'", 'to': u"orm['payment.LineItem']"}),
-            'percent': ('django.db.models.fields.FloatField', [], {'default': '0'})
-        },
-        u'payment.lineitem': {
-            'Meta': {'object_name': 'LineItem'},
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'invoice': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'items'", 'to': u"orm['payment.Invoice']"}),
-            'name': ('django.db.models.fields.TextField', [], {}),
-            'quantity': ('django.db.models.fields.FloatField', [], {'default': '1'}),
-            'unitPrice': ('django.db.models.fields.FloatField', [], {'default': '0'})
-        },
-        u'payment.payment': {
-            'Meta': {'object_name': 'Payment'},
-            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'invoice': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'payments'", 'to': u"orm['payment.Invoice']"}),
-            'method': ('django.db.models.fields.IntegerField', [], {}),
-            'status': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'transactionID': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'payments'", 'to': u"orm['auth.User']"}),
-            'value': ('django.db.models.fields.FloatField', [], {})
-        },
-        u'payment.stripeproxy': {
-            'Meta': {'object_name': 'StripeProxy'},
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'stripeID': ('django.db.models.fields.TextField', [], {}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'stripe'", 'to': u"orm['auth.User']"})
-        }
-    }
-
-    complete_apps = ['payment']
+    operations = [
+        migrations.CreateModel(
+            name='Credit',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('value', models.FloatField()),
+                ('created', models.DateTimeField(auto_now_add=True)),
+                ('description', models.TextField()),
+                ('identity', models.ForeignKey(related_name=b'credits', to='identity.Identity')),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='Invoice',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created', models.DateTimeField(auto_now_add=True)),
+                ('dueDate', models.DateField()),
+                ('open', models.BooleanField(default=True)),
+                ('draft', models.BooleanField(default=True)),
+                ('identity', models.ForeignKey(related_name=b'invoices', to='identity.Identity')),
+            ],
+            options={
+                'permissions': (('view_other_invoices', 'Can view invoices assigned to other identities'),),
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='LineDiscountItem',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('description', models.TextField()),
+                ('flatRate', models.FloatField(default=0)),
+                ('percent', models.FloatField(default=0)),
+                ('invoice', models.ForeignKey(related_name=b'discounts', to='payment.Invoice')),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='LineItem',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.TextField()),
+                ('unitPrice', models.FloatField(default=0)),
+                ('quantity', models.FloatField(default=1)),
+                ('invoice', models.ForeignKey(related_name=b'items', to='payment.Invoice')),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='Payment',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('value', models.FloatField()),
+                ('created', models.DateTimeField(auto_now_add=True)),
+                ('status', models.IntegerField(default=0, choices=[(0, b'Pending'), (1, b'Paid')])),
+                ('transactionID', models.TextField(null=True, blank=True)),
+                ('method', models.IntegerField(choices=[(0, b'Cash'), (1, b'Check'), (2, b'Stripe'), (3, b'Other'), (4, b'Credit')])),
+                ('identity', models.ForeignKey(related_name=b'payments', to='identity.Identity')),
+                ('invoice', models.ForeignKey(related_name=b'payments', to='payment.Invoice')),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='StripeProxy',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('stripeID', models.TextField()),
+                ('identity', models.ForeignKey(related_name=b'stripe', to='identity.Identity')),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.AddField(
+            model_name='linediscountitem',
+            name='lineItem',
+            field=models.ForeignKey(related_name=b'discounts', to='payment.LineItem'),
+            preserve_default=True,
+        ),
+    ]

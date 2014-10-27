@@ -2,7 +2,7 @@ from django.db import transaction
 from spiff.api.plugins import find_api_classes
 from spiff.subscription.models import SubscriptionPlan
 from spiff.payment.models import Invoice
-from spiff.identity.utils import monthRange
+from spiff.membership.utils import monthRange
 from spiff import funcLog
 
 def processSubscriptions():
@@ -13,18 +13,18 @@ def processSubscriptions():
       plans = planCls.objects.all()
       for plan in plans:
         for subscription in plan.subscriptions.filter(active=True):
-          if subscription.user not in lineItems:
-            lineItems[subscription.user] = {'subscriptions': [], 'lineItems': []}
+          if subscription.identity not in lineItems:
+            lineItems[subscription.identity] = {'subscriptions': [], 'lineItems': []}
 
           items = plan.process(subscription)
           funcLog().info("Processed subscription %s", subscription)
 
-          if len(items) > 0 and subscription not in lineItems[subscription.user]['subscriptions']:
-            lineItems[subscription.user]['subscriptions'].append(subscription)
-            lineItems[subscription.user]['lineItems'] += items
+          if len(items) > 0 and subscription not in lineItems[subscription.identity]['subscriptions']:
+            lineItems[subscription.identity]['subscriptions'].append(subscription)
+            lineItems[subscription.identity]['lineItems'] += items
     invoices = []
-    for user, data in lineItems.iteritems():
-      invoice = Invoice.bundleLineItems(user, endOfMonth, data['lineItems'])
+    for identity, data in lineItems.iteritems():
+      invoice = Invoice.bundleLineItems(identity, endOfMonth, data['lineItems'])
       if invoice:
         funcLog().info("Created invoice %s", invoice)
         invoices.append(invoice)

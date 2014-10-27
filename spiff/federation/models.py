@@ -6,5 +6,5 @@ class Federation(models.Model):
   lastContact = models.DateTimeField()
   permissions = models.ManyToManyField(Permission)
   ttl = models.IntegerField()
-  enabled = models.BooleanField()
+  enabled = models.BooleanField(default=True)
   alias = models.TextField()

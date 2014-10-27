@@ -104,6 +104,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'spiff.identity.middleware.AnonymousUserMiddleware',
+    'spiff.identity.middleware.IdentityMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -127,13 +128,13 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'bootstrap_toolkit',
-    'south',
     'gravatar',
     #'webfinger',
     'django_openid_auth',
     'openid_provider',
     'notification',
     'spiff.api',
+    'spiff.membership',
     'spiff.subscription',
     'spiff.donations',
     'spiff.identity',

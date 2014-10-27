@@ -16,7 +16,6 @@ from tastypie.utils import trailing_slash
 import models
 from spiff.api import SpiffAuthorization
 import json
-from spiff.subscription import v1_api as subscription
 from spiff import funcLog
 import jwt
 from django.conf import settings
@@ -56,46 +55,13 @@ class FieldResource(ModelResource):
 class FieldValueResource(ModelResource):
   field = fields.ToOneField(FieldResource, 'field', full=True)
   value = fields.CharField('value')
-  member = fields.ToOneField('spiff.identity.v1_api.MemberResource',
-  'member')
+  identity = fields.ToOneField('spiff.identity.v1_api.IdentityResource', 'identity')
 
   class Meta:
     queryset = models.FieldValue.objects.all()
     authorization = FieldValueAuthorization()
     always_return_data = True
 
-class RankPlanAuthorization(SpiffAuthorization):
-  def conditions(self):
-    return (
-      ('active_membership', 'rank is active membership'),
-    )+super(RankPlanAuthorization, self).conditions()
-
-  def check_perm(self, bundle, model, name):
-    if model.rank.isActiveMembership:
-      return super(RankPlanAuthorization, self).check_perm(bundle, model,
-        '%s_active_membership'%(name))
-    return super(RankPlanAuthorization, self).check_perm(bundle, model, name)
-
-class RankSubscriptionPlanResource(subscription.SubscriptionPlanResource):
-  class Meta:
-    queryset = models.RankSubscriptionPlan.objects.all()
-    authorization = RankPlanAuthorization()
-    always_return_data = True
-
-class RankResource(ModelResource):
-  group = fields.ToOneField('spiff.identity.v1_api.GroupResource', 'group')
-  monthlyDues = fields.FloatField('monthlyDues')
-  isActiveMembership = fields.BooleanField('isActiveMembership')
-
-  class Meta:
-    queryset = models.Rank.objects.all()
-    authorization = SpiffAuthorization()
-    always_return_data = True
-    filtering = {
-      'group': ALL_WITH_RELATIONS,
-      'monthlyDues': ALL_WITH_RELATIONS,
-      'isActiveMembership': ALL_WITH_RELATIONS
-    }
 
 class PermissionResource(ModelResource):
   name = fields.CharField('name', readonly=True)
@@ -115,7 +81,6 @@ class PermissionResource(ModelResource):
     }
 
 class GroupResource(ModelResource):
-  rank = fields.ToOneField(RankResource, 'rank', full=True, blank=True)
   permissions = fields.ToManyField(PermissionResource, 'permissions',
       full=False, blank=True)
 
@@ -129,91 +94,26 @@ class GroupResource(ModelResource):
       'permissions': ALL_WITH_RELATIONS
     }
 
-class SelfMemberAuthorization(SpiffAuthorization):
+class SelfIdentityAuthorization(SpiffAuthorization):
   def check_perm(self, bundle, model, name):
-    if bundle.request.user.member.pk == model.pk:
+    if bundle.request.identity.pk == model.pk:
       return True
-    return super(SelfMemberAuthorization, self).check_perm(bundle, model, name)
+    return super(SelfIdentityAuthorization, self).check_perm(bundle, model, name)
 
-class SelfUserAuthorization(SpiffAuthorization):
-  def check_perm(self, bundle, model, name):
-    funcLog().info("Checking if %s == %s", bundle.request.user, model)
-    if bundle.request.user.pk == model.pk:
-      return True
-    return super(SelfUserAuthorization, self).check_perm(bundle, model, name)
-
-class UserResource(ModelResource):
-  permissions = fields.ToManyField(PermissionResource, 'user_permissions',
-      full=False)
-
-  class Meta:
-    queryset = User.objects.all()
-    authorization = SelfUserAuthorization()
-    always_return_data = True
-    filtering = {
-      'username': ALL_WITH_RELATIONS,
-      'permissions': ALL_WITH_RELATIONS
-    }
-
-  def hydrate_permissions(self, bundle):
-    perms = []
-    for perm in bundle.data['permissions']:
-      if isinstance(perm, basestring):
-        try:
-          perms.append(PermissionResource().get_via_uri(perm, bundle.request))
-        except Permission.DoesNotExist:
-          app, codename = perm.split('.')
-          perms.append(Permission.objects.get(content_type__app_label=app, codename=codename))
-      else:
-        perms.append(perm)
-    bundle.data['permissions'] = perms
-    return bundle
-
-class MembershipPeriodResource(ModelResource):
-  rank = fields.ToOneField(RankResource, 'rank', full=True)
-  member = fields.ToOneField('spiff.identity.v1_api.MemberResource',
-  'member')
-  activeFromDate = fields.DateTimeField('activeFromDate')
-  activeToDate = fields.DateTimeField('activeToDate')
-  contiguousPeriods = fields.ToManyField('spiff.identity.v1_api.MembershipPeriodResource', 'contiguousPeriods', null=True)
-  contiguousDates = fields.ListField('contiguousDates', null=True)
-
-  class Meta:
-    queryset = models.MembershipPeriod.objects.all()
-    authorization = SpiffAuthorization()
-    always_return_data = True
-    filtering = {
-      'rank': ALL_WITH_RELATIONS,
-      'member': ALL_WITH_RELATIONS,
-      'activeFromDate': ALL_WITH_RELATIONS,
-      'activeToDate': ALL_WITH_RELATIONS
-    }
-
-class MemberResource(ModelResource):
-  user = fields.ToOneField(UserResource, 'user', full=False,
-  help_text="Associated User object")
+class IdentityResource(ModelResource):
   username = fields.CharField(attribute='user__username', help_text="Login Username")
   displayName = fields.CharField(attribute='displayName', null=True,
       help_text="Display name")
-  activeMember = fields.BooleanField(attribute='activeMember',
-      readonly=True, help_text='Whether or a not someone is in a group with the isActiveMembership bit set')
   isAnonymous = fields.BooleanField(attribute='isAnonymous')
   email = fields.CharField(attribute='user__email')
   groups = fields.ToManyField(GroupResource, 'user__groups', null=True,
       full=True)
-  outstandingBalance = fields.FloatField('outstandingBalance')
-  invoices = fields.ToManyField('spiff.payment.v1_api.InvoiceResource', 'user__invoices', null=True)
-  subscriptions = fields.ToManyField('spiff.subscription.v1_api.SubscriptionResource', 'user__subscriptions', null=True, full=True)
-  stripeCards = fields.ListField(attribute='stripeCards', default=[],
-      readonly=True)
   userid = fields.IntegerField('user_id', readonly=True)
-  membershipRanges = fields.ListField('membershipRanges', null=True)
-  availableCredit = fields.FloatField('availableCredit')
   fields = fields.ToManyField('spiff.identity.v1_api.FieldValueResource', 'attributes', full=False, null=True)
 
   class Meta:
     queryset = models.Identity.objects.all()
-    authorization = SelfMemberAuthorization()
+    authorization = SelfIdentityAuthorization()
     always_return_data = True
     filtering = {
       'groups': ALL_WITH_RELATIONS,
@@ -252,15 +152,15 @@ class MemberResource(ModelResource):
         models.FieldValue.objects.create(
           field = field,
           value = f['value'],
-          member = u.member
+          identity = u.identity
         )
-    bundle.obj = u.member
+    bundle.obj = u.identity
     return bundle
 
   def self(self, request, **kwargs):
     self.method_check(request, allowed=['get'])
     self.throttle_check(request)
-    return self.get_detail(request, pk=request.user.member.id)
+    return self.get_detail(request, pk=request.identity.id)
 
   def has_permission(self, request, permission_name, **kwargs):
     if permission_name == 'is_superuser' and request.user.is_superuser:
@@ -277,72 +177,13 @@ class MemberResource(ModelResource):
       url(r'^(?P<resource_name>%s)/requestPasswordReset%s$' %
         (self._meta.resource_name, trailing_slash()),
         self.wrap_view('requestPasswordReset'), name='requestPasswordReset'),
-      url(r'^(?P<resource_name>%s)/search%s$' %
-        (self._meta.resource_name, trailing_slash()),
-        self.wrap_view('search'), name='search'),
       url(r'^(?P<resource_name>%s)/self%s$' %
         (self._meta.resource_name, trailing_slash()),
         self.wrap_view('self'), name='self'),
-      url(r'^(?P<resource_name>%s)/(?P<id>.*)/stripeCards/(?P<stripeCardID>.*)%s$' %
-        (self._meta.resource_name, trailing_slash()),
-        self.wrap_view('stripeCard'), name='self'),
-      url(r'^(?P<resource_name>%s)/(?P<id>.*)/stripeCards%s$' %
-        (self._meta.resource_name, trailing_slash()),
-        self.wrap_view('stripeCards'), name='self'),
       url(r'^(?P<resource_name>%s)/self/has_permission/(?P<permission_name>.*)%s$' %
         (self._meta.resource_name, trailing_slash()),
         self.wrap_view('has_permission'), name='self_has_permission')
     ]
-
-  def stripeCards(self, request, **kwargs):
-    self.method_check(request, allowed=['post', 'get'])
-    self.is_authenticated(request)
-    self.throttle_check(request)
-    member = models.Identity.objects.get(pk=kwargs['id'])
-
-    if request.method == 'POST':
-      cardData = json.loads(request.body)
-      newCard = {}
-      newCard['number'] = cardData['card']
-      newCard['exp_month'] = cardData['exp_month']
-      newCard['exp_year'] = cardData['exp_year']
-      newCard['cvc'] = cardData['cvc']
-      member.addStripeCard(newCard)
-
-      return self.create_response(request, {'success': True})
-    else:
-      return self.create_response(request, {'cards': member.stripeCards})
-
-  def stripeCard(self, request, **kwargs):
-    self.method_check(request, allowed=['delete'])
-    self.is_authenticated(request)
-    self.throttle_check(request)
-
-    cardID = kwargs['stripeCardID']
-
-    member = models.Identity.objects.get(pk=kwargs['id'])
-    member.removeStripeCard(cardID)
-
-    return self.create_response(request, {'success': True})
-
-  def search(self, request, **kwargs):
-    self.method_check(request, allowed=['get'])
-    self.is_authenticated(request)
-    self.throttle_check(request)
-
-    query = Q()
-    query &= Q(member__displayName__icontains=request.GET['fullName'])
-    query &= Q(member__hidden=False)
-    funcLog().info("User search query: %s", query)
-    users = User.objects.filter(query)
-    objects = []
-    for u in users:
-      bundle = self.build_bundle(obj=u.member, request=request)
-      bundle = self.full_dehydrate(bundle)
-      objects.append(bundle)
-
-    object_list = {'objects': objects}
-    return self.create_response(request, object_list)
 
   def requestPasswordReset(self, request, **kwargs):
     self.method_check(request, allowed=['post'])
@@ -421,24 +262,3 @@ class MemberResource(ModelResource):
           t.delete()
       funcLog().warning("Invalid login for %s", username)
       raise ImmediateHttpResponse(response=HttpUnauthorized())
-
-class RankLineItemResource(ModelResource):
-  rank = fields.ToOneField(RankResource, 'rank')
-  member = fields.ToOneField(MemberResource, 'member')
-  activeFromDate = fields.DateField('activeFromDate')
-  activeToDate = fields.DateField('activeToDate')
-  invoice = fields.ToOneField('spiff.payment.v1_api.InvoiceResource', 'invoice')
-  quantity = fields.IntegerField('quantity')
-
-  class Meta:
-    queryset = models.RankLineItem.objects.all()
-    always_return_data = True
-    authorization = SpiffAuthorization()
-    filtering = {
-      'rank': ALL_WITH_RELATIONS,
-      'member': ALL_WITH_RELATIONS,
-      'activeFromDate': ALL_WITH_RELATIONS,
-      'activeToDate': ALL_WITH_RELATIONS,
-      'invoice': ALL_WITH_RELATIONS,
-      'quantity': ALL_WITH_RELATIONS
-    }
