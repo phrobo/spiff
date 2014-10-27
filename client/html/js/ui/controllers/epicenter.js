@@ -116,17 +116,30 @@ angular.module('spiff.epicenter', [
   });
 
   Spiff.$on('error', function(element, response) {
-    $modal.open({
-      templateUrl: 'error.html',
-      controller: function($scope, $modalInstance) {
-        $scope.status = response.status;
-        $scope.message = response.data.error_message;
-        $scope.traceback = response.data.traceback;
-        $scope.close = function() {
-          $modalInstance.close();
+    if (response.status == 0) {
+      $modal.open({
+        templateUrl: 'no-connection.html',
+        controller: function($scope, $modalInstance) {
+          $scope.close = function() {
+            $modalInstance.close();
+          }
         }
-      }
-    });
+      });
+    } else {
+      console.log('Got Spiff error:');
+      console.log(response);
+      $modal.open({
+        templateUrl: 'error.html',
+        controller: function($scope, $modalInstance) {
+          $scope.status = response.status;
+          $scope.message = response.data.error_message;
+          $scope.traceback = response.data.traceback;
+          $scope.close = function() {
+            $modalInstance.close();
+          }
+        }
+      });
+    }
   });
 
   SpaceAPI.ready(function(api) {
