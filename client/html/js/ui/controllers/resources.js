@@ -53,6 +53,18 @@ angular.module('spiff.resources', [
   $scope.close = function() {$modalInstance.close()};
 })
 
+.controller('AddResourceCtrl', function($scope, SpiffRestangular, $stateParams, $state, $modal) {
+  $scope.d = {};
+  $scope.save = function() {
+    SpiffRestangular.all('resource').post({
+      name: $scope.d.name,
+      trainable: $scope.d.trainable
+    }).then(function(res) {
+        $state.go('viewResource', {resourceID: res.id});
+    });
+  };
+})
+
 .controller('ResourceCtrl', function($scope, SpiffRestangular, $stateParams, $state, $modal) {
   var resource = SpiffRestangular.one('resource', $stateParams.resourceID);
   $scope.resource = resource;

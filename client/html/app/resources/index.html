@@ -3,6 +3,7 @@
     <div class="page-header">
       <h1>All Resources</h1>
     </div>
+    <a ui-sref="addResource">Add a resource</a>
     <ul class="thumbnails">
       <li ng-repeat="resource in resources">
         <a ui-sref="viewResource({resourceID: resource.id})">
