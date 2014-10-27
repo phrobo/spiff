@@ -10,6 +10,7 @@ class TrainingResource(ModelResource):
 
   class Meta:
     authorization = SpiffAuthorization()
+    always_return_data = True
     queryset = models.Certification.objects.all()
     filtering = {
       'resource': 'exact'
@@ -23,6 +24,7 @@ class ResourceMetadataResource(ModelResource):
   class Meta:
     authorization = SpiffAuthorization()
     queryset = models.Metadata.objects.all()
+    always_return_data = True
     filtering = {
       'resource': 'exact'
     }
@@ -71,15 +73,18 @@ class ChangelogResource(ModelResource):
   class Meta:
     queryset = models.Change.objects.all()
     authorization = SpiffAuthorization()
+    always_return_data = True
     filtering = {
       'resource': 'exact'
     }
 
 class ResourceResource(ModelResource):
   name = fields.CharField('name')
-  metadata = fields.ToManyField(ResourceMetadataResource, 'metadata', full=True)
+  metadata = fields.ToManyField(ResourceMetadataResource, 'metadata', full=True,
+      null=True)
 
   class Meta:
     queryset = models.Resource.objects.all()
     resource_name = 'resource'
+    always_return_data = True
     authorization = SpiffAuthorization()
