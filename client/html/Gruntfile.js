@@ -41,17 +41,21 @@ module.exports = function(grunt) {
       }
     },
     watch: {
-      bower: {
-        files: ['bower.js'],
-        tasks: ['bower']
+      index: {
+        files: ["app/index.html"],
+        tasks: ['build'],
+      },
+      templates: {
+        files: ["app/**/*.html"],
+        tasks: ['ngtemplates']
       },
       deps: {
-        files: ["bower_components/**/*"],
-        tasks: ['bower', 'uglify:generated']
+        files: ['bower.js', 'bower_components/**/*'],
+        tasks: ['bower', 'concat', 'uglify']
       },
       scripts: {
         files: ['js/**/*.js', 'js/*.js'],
-        tasks: ['uglify:generated'],
+        tasks: ['concat', 'uglify'],
       }
     },
     filerev: {
