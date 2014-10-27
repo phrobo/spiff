@@ -74,6 +74,12 @@ class Command(BaseCommand):
       management.call_command('syncdb', interactive=False)
       management.call_command('migrate', interactive=False)
       with transaction.atomic():
+        allSites = Site.objects.all()
+        if len(allSites) == 1 and allSites[0].domain == "example.com":
+          newSite = allSites[0]
+          newSite.domain = site.domain
+          newSite.name = site.name
+          site = newSite
         site.save()
         User.objects.create_superuser(username=username, password=password, email=email)
       print Fore.YELLOW+Style.BRIGHT+"EXCELLENT!"+Style.NORMAL+Fore.RESET
