@@ -71,7 +71,6 @@ class Command(BaseCommand):
     confirm = input("Does all of this look okay to you? [Y/n] ")
     if confirm.lower() == "y" or confirm == "":
       print Fore.GREEN+"Installing to database..."+Fore.RESET
-      management.call_command('syncdb', interactive=False)
       management.call_command('migrate', interactive=False)
       with transaction.atomic():
         allSites = Site.objects.all()
