@@ -21,7 +21,7 @@ class Migration(SchemaMigration):
         # Adding model 'Voucher'
         db.create_table(u'unwelcome_voucher', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('member', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['identity.Identity'])),
+            ('identity', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['identity.Identity'])),
             ('unwelsomePerson', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['unwelcome.UnwelcomePerson'])),
             ('timestamp', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
         ))
@@ -86,7 +86,7 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'FieldValue'},
             'field': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['identity.Field']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'member': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'attributes'", 'to': u"orm['identity.Identity']"}),
+            'identity': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'attributes'", 'to': u"orm['identity.Identity']"}),
             'value': ('django.db.models.fields.TextField', [], {})
         },
         u'identity.identity': {
@@ -111,7 +111,7 @@ class Migration(SchemaMigration):
         u'unwelcome.voucher': {
             'Meta': {'object_name': 'Voucher'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'member': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['identity.Identity']"}),
+            'identity': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['identity.Identity']"}),
             'timestamp': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'unwelsomePerson': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['unwelcome.UnwelcomePerson']"})
         }

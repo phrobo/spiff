@@ -8,6 +8,6 @@ class UnwelcomePerson(models.Model):
   timestamp = models.DateTimeField(auto_now_add=True)
 
 class Voucher(models.Model):
-  member = models.ForeignKey(spiff.identity.models.Identity)
+  identity = models.ForeignKey(spiff.identity.models.Identity)
   unwelsomePerson = models.ForeignKey('UnwelcomePerson')
   timestamp = models.DateTimeField(auto_now_add=True)
