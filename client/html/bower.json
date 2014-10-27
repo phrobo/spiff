@@ -18,20 +18,17 @@
   ],
   "dependencies": {
     "bootstrap": "~2.3.2",
-    "jquery": "~1.10.2",
-    "jquery-ui": "~1.10",
+    "jquery": ">=1",
+    "jquery-ui": ">=1",
     "jquery-qrcode": "",
-    "underscore": "~1.5.2",
-    "angular": "~1.2.6",
-    "angular-route": "~1.2.6",
+    "underscore": ">=1.5",
+    "angular": ">=1.3",
+    "angular-route": ">=1.3",
     "angular-gravatar": "",
     "angular-md5": "",
-    "angular-ui-bootstrap-bower": "0.8.0",
-    "angular-ui-router": "0.2.8-bowratic-tedium",
+    "angular-ui-bootstrap-bower": ">=0.11.2",
+    "angular-ui-router": ">=0.2.11",
     "restangular": "",
     "angular-markdown-directive": ""
-  },
-  "resolutions": {
-    "angular": "~1.2.12"
   }
 }
